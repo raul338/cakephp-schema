@@ -1,5 +1,5 @@
 {
-    "name": "scherersoftware/cakephp-schema",
+    "name": "raul338/cakephp-schema",
     "description": "Schema saving and loading from file for CakePHP 3.0",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "orm", "database", "schema", "migrations"],
