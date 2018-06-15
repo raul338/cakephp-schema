@@ -119,7 +119,7 @@ class SchemaLoadTask extends Shell
             $db = $this->_connection();
         }
 
-        $schemaCollection = $db->schemaCollection();
+        $schemaCollection = $db->getSchemaCollection();
         $tables = $schemaCollection->listTables();
 
         if (count($tables) > 0 && !$this->_config['no-interaction']) {
@@ -161,13 +161,13 @@ class SchemaLoadTask extends Shell
     protected function _generateDropForeignKeys($db, Schema $table)
     {
         $type = 'other';
-        if ($db->driver() instanceof Mysql) {
+        if ($db->getDriver() instanceof Mysql) {
             $type = 'mysql';
         }
 
         $queries = [];
         foreach ($table->constraints() as $constraintName) {
-            $constraint = $table->constraint($constraintName);
+            $constraint = $table->getConstraint($constraintName);
             if ($constraint['type'] === Schema::CONSTRAINT_FOREIGN) {
                 // TODO: Move this into the driver
                 if ($type === 'mysql') {
@@ -275,7 +275,7 @@ class SchemaLoadTask extends Shell
             }
         }
         if (!empty($fields['_options'])) {
-            $schema->options($fields['_options']);
+            $schema->setOptions($fields['_options']);
         }
 
         return $schema;

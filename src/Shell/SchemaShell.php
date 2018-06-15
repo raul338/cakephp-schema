@@ -8,6 +8,11 @@ use Schema\Task\SchemaSave;
 
 /**
  * Command-line code schema saving and loading.
+ *
+ * @property \Schema\Shell\Task\SchemaSaveTask $SchemaSave
+ * @property \Schema\Shell\Task\SchemaLoadTask $SchemaLoad
+ * @property \Schema\Shell\Task\SeedImportTask $SeedImport
+ * @property \Schema\Shell\Task\SeedGenerateTask $SeedGenerate
  */
 class SchemaShell extends Shell
 {
@@ -83,7 +88,7 @@ class SchemaShell extends Shell
     {
         $parser = parent::getOptionParser();
 
-        return $parser->description([
+        return $parser->setDescription([
             'Schema Shell',
             '',
             'Saves and loads the schema from the the schema.php file.'

@@ -6,6 +6,9 @@ use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SeedTask;
 use Riimu\Kit\PHPEncoder\PHPEncoder;
 
+/**
+ * @property \Schema\Shell\Task\SeedGenerateTask $SeedGenerate
+ */
 class MigrationSeedTask extends SeedTask
 {
 

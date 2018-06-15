@@ -2,12 +2,12 @@
 namespace Schema;
 
 use Cake\Database\Connection;
-use Cake\Database\Schema\Table as SchemaTable;
+use Cake\Database\Schema\TableSchema;
 
 /**
  * Custom table object for better manipulation with foreign keys.
  */
-class Table extends SchemaTable
+class Table extends TableSchema
 {
     /**
      * Foreign keys constraints
@@ -36,6 +36,7 @@ class Table extends SchemaTable
     public function createSql(Connection $connection)
     {
         $this->_extractForeignKeys($connection);
+
         return parent::createSql($connection);
     }
 
@@ -56,6 +57,7 @@ class Table extends SchemaTable
                 $statement
             );
         }
+
         return $constraints;
     }
 
@@ -67,7 +69,7 @@ class Table extends SchemaTable
      */
     protected function _extractForeignKeys(Connection $connection)
     {
-        $dialect = $connection->driver()->schemaDialect();
+        $dialect = $connection->getDriver()->schemaDialect();
 
         foreach ($this->_constraints as $name => $attrs) {
             if ($attrs['type'] === static::CONSTRAINT_FOREIGN) {

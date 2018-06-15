@@ -103,7 +103,7 @@ class SchemaSaveTask extends SimpleBakeTask
                 'Cannot generate fixtures for connections that do not implement schemaCollection()'
             );
         }
-        $schemaCollection = $connection->schemaCollection();
+        $schemaCollection = $connection->getSchemaCollection();
         $tables = $schemaCollection->listTables();
 
         $data = [];
@@ -120,28 +120,28 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * Generates a string representation of a schema.
      *
-     * @param \Cake\Database\Schema\Table $table Table schema.
+     * @param \Cake\Database\Schema\TableSchema $table Table schema.
      * @return string fields definitions
      */
     protected function _generateSchema(Table $table)
     {
         $cols = $indexes = $constraints = [];
         foreach ($table->columns() as $field) {
-            $fieldData = $table->column($field);
+            $fieldData = $table->getColumn($field);
             $properties = implode(', ', $this->_values($fieldData));
             $cols[] = "            '$field' => [$properties],";
         }
         foreach ($table->indexes() as $index) {
-            $fieldData = $table->index($index);
+            $fieldData = $table->getIndex($index);
             $properties = implode(', ', $this->_values($fieldData));
             $indexes[] = "                '$index' => [$properties],";
         }
         foreach ($table->constraints() as $index) {
-            $fieldData = $table->constraint($index);
+            $fieldData = $table->getConstraint($index);
             $properties = implode(', ', $this->_values($fieldData));
             $constraints[] = "                '$index' => [$properties],";
         }
-        $options = $this->_values($table->options());
+        $options = $this->_values($table->getOptions());
 
         $content = implode("\n", $cols) . "\n";
         if (!empty($indexes)) {

@@ -66,7 +66,8 @@ class SeedGenerateTask extends SimpleBakeTask
     {
         // Hook into the bake process to load our SchemaHelper
         EventManager::instance()->on('Bake.initialize', function (Event $event) {
-            $view = $event->subject;
+            /** @var \Cake\View\View $view */
+            $view = $event->getSubject();
             $view->loadHelper('Schema.Schema');
         });
 
@@ -93,7 +94,7 @@ class SeedGenerateTask extends SimpleBakeTask
         $seedData = [];
 
         $connection = ConnectionManager::get($this->_config['connection']);
-        $schemaCollection = $connection->schemaCollection();
+        $schemaCollection = $connection->getSchemaCollection();
 
         if (!($excludedTables = Configure::read('Schema.GenerateSeed.excludedTables'))) {
             $excludedTables = [];
@@ -132,7 +133,7 @@ class SeedGenerateTask extends SimpleBakeTask
 
         $records = $model->find('all')
             ->where($conditions)
-            ->hydrate(false);
+            ->enableHydration(false);
 
         if ($recordCount) {
             $records->limit($recordCount);
@@ -146,7 +147,7 @@ class SeedGenerateTask extends SimpleBakeTask
      *
      * @param string $modelName Camelized model name
      * @param string $useTable Table to use
-     * @return Cake\ORM\Table
+     * @return \Cake\ORM\Table
      */
     public function findModel($modelName, $useTable)
     {

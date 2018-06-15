@@ -12,6 +12,9 @@ use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Exception;
 
+/**
+ * @property \Schema\Shell\Task\SeedGenerateTask $SeedGenerate
+ */
 class SeedImportTask extends Shell
 {
     public $tasks = ['Schema.SeedGenerate'];
@@ -95,7 +98,7 @@ class SeedImportTask extends Shell
     /**
      * Truncates table. Deletes all rows in the table.
      *
-     * @param  \Cake\Datasource\Connection $db Connection where table is stored.
+     * @param  \Cake\Database\Connection $db Connection where table is stored
      * @param  string $table Table name.
      * @return void
      */
@@ -138,7 +141,7 @@ class SeedImportTask extends Shell
     /**
      * Insert data into table.
      *
-     * @param  \Cake\Datasource\Connection $db Connection where table is stored.
+     * @param  \Cake\Database\Connection $db Connection where table is stored.
      * @param  string $table Table name.
      * @param  array $rows Data to be stored.
      * @return void
@@ -165,7 +168,7 @@ class SeedImportTask extends Shell
     /**
      * Runs operation in the SQL transaction with disabled logging.
      *
-     * @param  \Cake\Datasource\Connection $db Connection to run the transaction on.
+     * @param  \Cake\Database\Connection $db Connection to run the transaction on.
      * @param  callable $operation Operation to run.
      * @return void
      */
@@ -200,7 +203,7 @@ class SeedImportTask extends Shell
         }
         $fields = array_values(array_unique($fields));
         foreach ($fields as $field) {
-            $types[$field] = $schema->columnType($field);
+            $types[$field] = $schema->getColumnType($field);
         }
         $default = array_fill_keys($fields, null);
         foreach ($records as $record) {
@@ -218,7 +221,7 @@ class SeedImportTask extends Shell
     protected function _beforeTableInsert($db, $table)
     {
         // TODO: Move this into the driver
-        if ($db->driver() instanceof Sqlserver) {
+        if ($db->getDriver() instanceof Sqlserver) {
             $table = $db->quoteIdentifier($table);
             $db->query(sprintf('SET IDENTITY_INSERT %s ON', $table))->closeCursor();
         }
@@ -232,7 +235,7 @@ class SeedImportTask extends Shell
     protected function _afterTableInsert($db, $table)
     {
         // TODO: Move this into the driver
-        if ($db->driver() instanceof Sqlserver) {
+        if ($db->getDriver() instanceof Sqlserver) {
             $table = $db->quoteIdentifier($table);
             $db->query(sprintf('SET IDENTITY_INSERT %s OFF', $table))->closeCursor();
         }
