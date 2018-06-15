@@ -206,6 +206,7 @@ class SeedImportTask extends Shell
         foreach ($records as $record) {
             $values[] = array_merge($default, $record);
         }
+
         return [$fields, $values, $types];
     }
 
@@ -251,6 +252,7 @@ class SeedImportTask extends Shell
                 'Cannot generate fixtures for connections that do not implement schemaCollection()'
             );
         }
+
         return $db;
     }
 

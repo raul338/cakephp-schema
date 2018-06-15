@@ -23,6 +23,7 @@ class MigrationSeedTask extends SeedTask
             'boolean' => true,
             'help' => 'Include records from the database in the seed file'
         ]);
+
         return $parser;
     }
 
@@ -42,6 +43,7 @@ class MigrationSeedTask extends SeedTask
                 #debug($templateData);exit;
             }
         }
+
         return $templateData;
     }
 
@@ -77,6 +79,7 @@ class MigrationSeedTask extends SeedTask
             $out .= "\n            ],\n";
         }
         $out .= "        ]";
+
         return $out;
     }
 }

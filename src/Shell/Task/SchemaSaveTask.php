@@ -113,6 +113,7 @@ class SchemaSaveTask extends SimpleBakeTask
         }
 
         $this->_io->out(); // New line
+
         return $data;
     }
 
@@ -152,6 +153,7 @@ class SchemaSaveTask extends SimpleBakeTask
         if (!empty($options)) {
             $content .= "            '_options' => [\n" . implode(', ', $options) . "\n            ],\n";
         }
+
         return "[\n$content        ]";
     }
 
@@ -182,6 +184,7 @@ class SchemaSaveTask extends SimpleBakeTask
                 }
             }
         }
+
         return $vals;
     }
 }

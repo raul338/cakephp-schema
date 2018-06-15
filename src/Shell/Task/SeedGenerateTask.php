@@ -110,11 +110,11 @@ class SeedGenerateTask extends SimpleBakeTask
             }
             $seedData[$tableName] = $data;
         }
+
         return [
             'seedData' => $seedData
         ];
     }
-
 
     /**
      * Interact with the user to get a custom SQL condition and use that to extract data
@@ -164,6 +164,7 @@ class SeedGenerateTask extends SimpleBakeTask
         if (get_class($model) == 'Cake\ORM\Table') {
             $this->out('Warning: Using Auto-Table for ' . $modelName);
         }
+
         return $model;
     }
 }

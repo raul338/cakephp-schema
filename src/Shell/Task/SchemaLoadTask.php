@@ -56,6 +56,7 @@ class SchemaLoadTask extends Shell
 
         if ($queries === false) {
             $this->_io->err(sprintf('<error>Deletion was terminated by the user.</error>.'), 2);
+
             return;
         }
 
@@ -79,6 +80,7 @@ class SchemaLoadTask extends Shell
 
         if ($queries === false) {
             $this->_io->err(sprintf('<error>Schema was not loaded</error>.'), 2);
+
             return;
         }
 
@@ -145,6 +147,7 @@ class SchemaLoadTask extends Shell
             $dropSql = $table->dropSql($db);
             $dropTables = array_merge($dropTables, $dropSql);
         }
+
         return array_merge($dropForeignKeys, $dropTables);
     }
 
@@ -175,6 +178,7 @@ class SchemaLoadTask extends Shell
                 $queries[] = sprintf($template, $table->name(), $constraintName);
             }
         }
+
         return $queries;
     }
 
@@ -220,6 +224,7 @@ class SchemaLoadTask extends Shell
                 'Cannot generate fixtures for connections that do not implement schemaCollection()'
             );
         }
+
         return $db;
     }
 
@@ -246,7 +251,7 @@ class SchemaLoadTask extends Shell
     /**
      * Build the fixtures table schema from the fields property.
      *
-     * @param  string $tableNames Name of the table.
+     * @param  string $tableName Name of the table.
      * @param  array $fields Fields saved into the schema.php file.
      * @return \Cake\Database\Schema\Table Table schema
      */
@@ -272,6 +277,7 @@ class SchemaLoadTask extends Shell
         if (!empty($fields['_options'])) {
             $schema->options($fields['_options']);
         }
+
         return $schema;
     }
 }

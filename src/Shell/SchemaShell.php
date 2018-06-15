@@ -13,7 +13,6 @@ class SchemaShell extends Shell
 {
     public $tasks = ['Schema.SchemaSave', 'Schema.SchemaLoad', 'Schema.SeedImport', 'Schema.SeedGenerate'];
 
-
     /**
      * Constructs this Shell instance.
      *
