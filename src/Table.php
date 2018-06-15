@@ -64,7 +64,7 @@ class Table extends TableSchema
     /**
      * Refresh the protected foreign keys variable.
      * All foreign keys are removed from the original constraints.
-     *
+     * @param \Cake\Database\Connection $connection Connection
      * @return void
      */
     protected function _extractForeignKeys(Connection $connection)

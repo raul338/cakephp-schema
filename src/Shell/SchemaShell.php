@@ -82,7 +82,7 @@ class SchemaShell extends Shell
     /**
      * Get the option parser.
      *
-     * @return void
+     * @return \Cake\Console\ConsoleOptionParser
      */
     public function getOptionParser()
     {

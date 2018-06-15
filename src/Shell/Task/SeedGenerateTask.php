@@ -59,7 +59,7 @@ class SeedGenerateTask extends SimpleBakeTask
 
     /**
      * main() method.
-     *
+     * @param array $options Bake options
      * @return bool|int Success or error code.
      */
     public function generate(array $options = [])
@@ -80,7 +80,7 @@ class SeedGenerateTask extends SimpleBakeTask
             throw new Exception(sprintf('Schema file "%s" does not exist.', $this->_config['path']));
         }
 
-        parent::bake('seed');
+        return parent::bake('seed');
     }
 
     /**

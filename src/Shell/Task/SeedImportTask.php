@@ -33,7 +33,7 @@ class SeedImportTask extends Shell
 
     /**
      * main() method.
-     *
+     * @param array $options Set connection name and path to the seed.php file.
      * @return bool|int Success or error code.
      */
     public function import(array $options = [])
@@ -215,7 +215,8 @@ class SeedImportTask extends Shell
 
     /**
      * Prepare table for data insertion.
-     *
+     * @param \Cake\Database\Connection $db Connection
+     * @param \Schema\Table $table Table
      * @return void
      */
     protected function _beforeTableInsert($db, $table)
@@ -229,7 +230,8 @@ class SeedImportTask extends Shell
 
     /**
      * Clean after inserting.
-     *
+     * @param \Cake\Database\Connection $db Connection
+     * @param \Schema\Table $table Table
      * @return void
      */
     protected function _afterTableInsert($db, $table)
