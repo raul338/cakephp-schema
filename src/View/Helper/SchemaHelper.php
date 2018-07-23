@@ -34,7 +34,7 @@ class SchemaHelper extends Helper
         foreach ($records as $record) {
             $values = [];
             foreach ($record as $field => $value) {
-                if ($value instanceof \DateTime) {
+                if ($value instanceof \DateTimeInterface) {
                     $value = $value->format('Y-m-d H:i:s');
                 }
                 if (is_array($value)) {
