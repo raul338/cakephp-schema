@@ -1,5 +1,5 @@
 parameters:
-    bootstrap: config/bootstrap.php
+    bootstrap: tests/bootstrap.php
     earlyTerminatingMethodCalls:
         Cake\Shell\Shell:
             - abort

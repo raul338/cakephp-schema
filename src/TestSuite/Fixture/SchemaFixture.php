@@ -26,9 +26,11 @@ class SchemaFixture extends TestFixture
         if (array_key_exists($className, $ret['tables'])) {
             $this->fields = $ret['tables'][$className];
         }
-        $ret = require ROOT . DS . 'config' . DS . 'seed.php';
-        if (array_key_exists($className, $ret)) {
-            $this->records = $ret[$className];
+        if (file_exists(ROOT . DS . 'config' . DS . 'seed.php')) {
+            $ret = require ROOT . DS . 'config' . DS . 'seed.php';
+            if (array_key_exists($className, $ret)) {
+                $this->records = $ret[$className];
+            }
         }
         parent::init();
     }
