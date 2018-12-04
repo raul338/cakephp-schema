@@ -125,11 +125,14 @@ class SeedImportTask extends Shell
         $operation = function ($db) use ($data) {
             $db->disableForeignKeys();
             foreach ($data as $table => $rows) {
+                $this->_io->verbose("Seeding table $table", 0);
                 $this->_io->out('.', 0);
 
                 $this->_beforeTableInsert($db, $table);
                 $this->_insertTable($db, $table, $rows);
                 $this->_afterTableInsert($db, $table);
+
+                $this->_io->verbose('');
             }
             $db->enableForeignKeys();
         };
