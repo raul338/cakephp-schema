@@ -177,15 +177,15 @@ class SeedImportTask extends Shell
      */
     protected function _runOperation($db, $operation)
     {
-        $logQueries = $db->logQueries();
+        $logQueries = $db->isQueryLoggingEnabled();
         if ($logQueries) {
-            $db->logQueries(false);
+            $db->enableQueryLogging(false);
         }
 
         $db->transactional($operation);
 
         if ($logQueries) {
-            $db->logQueries(true);
+            $db->enableQueryLogging(true);
         }
     }
 

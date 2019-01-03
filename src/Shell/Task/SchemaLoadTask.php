@@ -191,9 +191,9 @@ class SchemaLoadTask extends Shell
      */
     protected function _execute($db, $queries = null)
     {
-        $logQueries = $db->logQueries();
+        $logQueries = $db->isQueryLoggingEnabled();
         if ($logQueries) {
-            $db->logQueries(false);
+            $db->enableQueryLogging(false);
         }
 
         $db->transactional(function ($db) use ($queries) {
@@ -206,7 +206,7 @@ class SchemaLoadTask extends Shell
         });
 
         if ($logQueries) {
-            $db->logQueries(true);
+            $db->enableQueryLogging(true);
         }
     }
 
