@@ -3,7 +3,7 @@ namespace Schema\Shell\Task;
 
 use Bake\Shell\Task\SimpleBakeTask;
 use Cake\Console\Shell;
-use Cake\Database\Schema\Table;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 
@@ -123,7 +123,7 @@ class SchemaSaveTask extends SimpleBakeTask
      * @param \Cake\Database\Schema\TableSchema $table Table schema.
      * @return string fields definitions
      */
-    protected function _generateSchema(Table $table)
+    protected function _generateSchema(TableSchema $table)
     {
         $cols = $indexes = $constraints = [];
         foreach ($table->columns() as $field) {

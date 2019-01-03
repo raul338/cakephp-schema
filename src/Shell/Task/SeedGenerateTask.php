@@ -123,7 +123,7 @@ class SeedGenerateTask extends SimpleBakeTask
      *
      * @param string $modelName name of the model to take records from.
      * @param string|null $useTable Name of table to use.
-     * @return array Array of records.
+     * @return \Cake\ORM\Query Array of records.
      */
     public function getRecordsFromTable($modelName, $useTable = null)
     {

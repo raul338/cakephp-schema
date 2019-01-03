@@ -4,7 +4,7 @@ namespace Schema\Shell\Task;
 use Cake\Console\Shell;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlite;
-use Cake\Database\Schema\Table as Schema;
+use Cake\Database\Schema\TableSchema as Schema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Exception;
@@ -96,7 +96,7 @@ class SchemaLoadTask extends Shell
 
         // Add all foreign key constraints
         foreach ($tableSchemes as $table) {
-            $foreignKeys = $table->foreignKeysSql($db);
+            $foreignKeys = $table->addConstraintSql($db);
             $queries = array_merge($queries, $foreignKeys);
         }
 
@@ -155,7 +155,7 @@ class SchemaLoadTask extends Shell
      * Generates SQL statements dropping foreign keys for the table.
      *
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
-     * @param  \Cake\Database\Schema\Table $table Drop foreign keys for this table.
+     * @param  \Cake\Database\Schema\TableSchema $table Drop foreign keys for this table.
      * @return array List of SQL statements dropping foreign keys.
      */
     protected function _generateDropForeignKeys($db, Schema $table)
@@ -253,7 +253,7 @@ class SchemaLoadTask extends Shell
      *
      * @param  string $tableName Name of the table.
      * @param  array $fields Fields saved into the schema.php file.
-     * @return \Cake\Database\Schema\Table Table schema
+     * @return \Cake\Database\Schema\TableSchema Table schema
      */
     protected function _schemaFromFields($tableName, $fields)
     {

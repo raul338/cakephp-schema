@@ -5,12 +5,13 @@ use Cake\Cache\Cache;
 use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Database\Driver\Sqlserver;
-use Cake\Database\Schema\Table;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
-use Exception;
+use \Exception;
+use Schema\Table;
 
 /**
  * @property \Schema\Shell\Task\SeedGenerateTask $SeedGenerate
