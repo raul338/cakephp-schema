@@ -1,4 +1,4 @@
-# Schema plugin for CakePHP 3.0
+# Schema plugin for CakePHP 3.6
 
 Save the schema into one file and then restore the database from the schema file. The schema is automatically saved when executing `cake migrations migrate`.
 
