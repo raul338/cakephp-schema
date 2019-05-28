@@ -90,17 +90,16 @@ class SeedGenerateTask extends SimpleBakeTask
      */
     public function templateData()
     {
-        $schema = require $this->_config['path'];
         $seedData = [];
 
         $connection = ConnectionManager::get($this->_config['connection']);
-        $schemaCollection = $connection->getSchemaCollection();
+        $tables = $connection->getSchemaCollection()->listTables();
 
         if (!($excludedTables = Configure::read('Schema.GenerateSeed.excludedTables'))) {
             $excludedTables = [];
         }
 
-        foreach ($schema['tables'] as $tableName => $tableSchema) {
+        foreach ($tables as $tableName) {
             if (in_array($tableName, $excludedTables)) {
                 continue;
             }
