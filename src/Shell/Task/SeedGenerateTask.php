@@ -150,12 +150,13 @@ class SeedGenerateTask extends SimpleBakeTask
      */
     public function findModel($modelName, $useTable)
     {
-        $model = TableRegistry::get($modelName);
+        $options = ['connectionName' => $this->_config['connection']];
+        $model = TableRegistry::get($modelName, $options);
         // This means we have not found a Table implementation in the app namespace
         // Iterate through loaded plugins and try to find the table
         if (get_class($model) == 'Cake\ORM\Table') {
             foreach (\Cake\Core\Plugin::loaded() as $plugin) {
-                $ret = TableRegistry::get("{$plugin}.{$modelName}");
+                $ret = TableRegistry::get("{$plugin}.{$modelName}", $options);
                 if (get_class($ret) != 'Cake\ORM\Table') {
                     $model = $ret;
                 }
