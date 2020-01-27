@@ -30,7 +30,7 @@
         "cakephp/migrations": "^3.0.0-beta2"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
+        "phpunit/phpunit": "^8.5",
         "cakephp/bake": "~2.0",
         "cakephp/cakephp-codesniffer": "^3.0",
         "dereuromark/cakephp-ide-helper": "^1.0",
@@ -50,7 +50,7 @@
     "scripts": {
         "cs-check": "phpcs --colors -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config",
         "cs-fix": "phpcbf --colors --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP ./src ./tests ./config",
-        "phpstan": "phpstan analyze -c phpstan.neon ./src ./tests --no-progress -l 2 --ansi --memory-limit=-1"
+        "phpstan": "phpstan analyze -c phpstan.neon --ansi --memory-limit=-1"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

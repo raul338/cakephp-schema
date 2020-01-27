@@ -3,3 +3,7 @@ parameters:
     earlyTerminatingMethodCalls:
         Cake\Shell\Shell:
             - abort
+    level: 2
+    paths:
+        - ./src
+        - ./tests

@@ -50,6 +50,8 @@ class SeedImportTask extends Shell
             }
         }
         $this->seed();
+
+        return true;
     }
 
     /**
@@ -105,7 +107,12 @@ class SeedImportTask extends Shell
      */
     protected function _truncateTable($db, $table)
     {
-        $schema = $db->schemaCollection()->describe($table);
+        $schema = $db->getSchemaCollection()->describe($table);
+        if (!$table instanceof TableSchema) {
+            trigger_error("Table $table did not return \Cake\Database\Schema\TableSchema", E_USER_WARNING);
+
+            return;
+        }
         $truncateSql = $schema->truncateSql($db);
         foreach ($truncateSql as $statement) {
             $db->execute($statement)->closeCursor();

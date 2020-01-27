@@ -28,7 +28,7 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function name()
+    public function name(): string
     {
         return 'seed';
     }
@@ -36,7 +36,7 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function fileName($name)
+    public function fileName(string $name): string
     {
         return $this->_config['seed'];
     }
@@ -44,7 +44,7 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function template()
+    public function template(): string
     {
         return 'Schema.config/seed';
     }
@@ -52,7 +52,7 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         return ROOT . DS;
     }
@@ -88,7 +88,7 @@ class SeedGenerateTask extends SimpleBakeTask
      *
      * @return array
      */
-    public function templateData()
+    public function templateData(): array
     {
         $seedData = [];
 

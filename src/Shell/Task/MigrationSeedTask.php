@@ -1,6 +1,7 @@
 <?php
 namespace Schema\Shell\Task;
 
+use Cake\Console\ConsoleOptionParser;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SeedTask;
@@ -19,7 +20,7 @@ class MigrationSeedTask extends SeedTask
      *
      * @return \Cake\Console\ConsoleOptionParser
      */
-    public function getOptionParser()
+    public function getOptionParser(): ConsoleOptionParser
     {
         $parser = parent::getOptionParser();
         $parser->addOption('records', [
@@ -35,7 +36,7 @@ class MigrationSeedTask extends SeedTask
      *
      * @return array
      */
-    public function templateData()
+    public function templateData(): array
     {
         $templateData = parent::templateData();
         if (!empty($this->params['records'])) {

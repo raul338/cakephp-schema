@@ -20,7 +20,7 @@ class SchemaFixture extends TestFixture
      * Workaround to use cakephp-schema seed as fixtures
      * @return void
      */
-    public function init()
+    public function init(): void
     {
         list($namespace, $className) = namespaceSplit(get_called_class());
         $className = substr($className, 0, strlen('Fixture') * -1);

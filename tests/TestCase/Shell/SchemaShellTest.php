@@ -15,7 +15,7 @@ class SchemaShellTest extends TestCase
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->io = $this->getMock('Cake\Console\ConsoleIo');
@@ -27,7 +27,7 @@ class SchemaShellTest extends TestCase
      *
      * @return void
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->Schema);
 
@@ -39,7 +39,7 @@ class SchemaShellTest extends TestCase
      *
      * @return void
      */
-    public function testMain()
+    public function testMain(): void
     {
         $this->markTestIncomplete('Not implemented yet.');
     }

@@ -5,6 +5,7 @@ use Cake\Console\Shell;
 use Cake\Database\Driver\Mysql;
 use Cake\Database\Driver\Sqlite;
 use Cake\Database\Schema\TableSchema as Schema;
+use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Exception;
@@ -140,6 +141,10 @@ class SchemaLoadTask extends Shell
         foreach ($tables as $tableName) {
             $this->_io->out('.', 0);
             $table = $schemaCollection->describe($tableName);
+            if (!$table instanceof TableSchema) {
+                trigger_error("Table $tableName did not return \Cake\Database\Schema\TableSchema", E_USER_WARNING);
+                continue;
+            }
 
             $dropKeys = $this->_generateDropForeignKeys($db, $table);
             $dropForeignKeys = array_merge($dropForeignKeys, $dropKeys);

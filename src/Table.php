@@ -33,7 +33,7 @@ class Table extends TableSchema
      * @return array List of SQL statements to create the table and the
      *    required indexes.
      */
-    public function createSql(Connection $connection)
+    public function createSql(Connection $connection): array
     {
         $this->_extractForeignKeys($connection);
 

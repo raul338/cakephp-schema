@@ -23,7 +23,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function name()
+    public function name(): string
     {
         return 'schema';
     }
@@ -31,7 +31,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function fileName($name)
+    public function fileName($name): string
     {
         return $this->_config['path'];
     }
@@ -39,7 +39,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function template()
+    public function template(): string
     {
         return 'Schema.config/schema';
     }
@@ -47,7 +47,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * {@inheritDoc}
      */
-    public function getPath()
+    public function getPath(): string
     {
         return ROOT . DS;
     }
@@ -55,7 +55,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * {@inheritdoc}
      */
-    public function templateData()
+    public function templateData(): array
     {
         $tables = '';
 
