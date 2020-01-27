@@ -33,7 +33,8 @@
         "phpunit/phpunit": "*",
         "cakephp/bake": "~2.0",
         "cakephp/cakephp-codesniffer": "^3.0",
-        "dereuromark/cakephp-ide-helper": "^1.0"
+        "dereuromark/cakephp-ide-helper": "^1.0",
+        "phpstan/phpstan": "^0.12.8"
     },
     "autoload": {
         "psr-4": {
