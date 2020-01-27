@@ -17,7 +17,7 @@ if (!Configure::check($configKey) || Configure::read($configKey) === true) {
         $input = $manager->getInput();
         $connectionName = $input->getOption('connection');
 
-        $task = new SchemaSaveTask;
+        $task = new SchemaSaveTask();
         $task->interactive = false;
         $task->initialize();
         $task->loadTasks();

@@ -91,42 +91,42 @@ class SchemaShell extends Shell
         return $parser->setDescription([
             'Schema Shell',
             '',
-            'Saves and loads the schema from the the schema.php file.'
+            'Saves and loads the schema from the the schema.php file.',
         ])->addSubcommand('save', [
-            'help' => 'Saves the schema into schema.php file.'
+            'help' => 'Saves the schema into schema.php file.',
         ])->addSubcommand('load', [
-            'help' => 'Loads the schema from the schema.php file.'
+            'help' => 'Loads the schema from the schema.php file.',
         ])->addSubcommand('drop', [
-            'help' => 'Drops all tables in the database.'
+            'help' => 'Drops all tables in the database.',
         ])->addSubcommand('seed', [
-            'help' => 'Inserts data into the database.'
+            'help' => 'Inserts data into the database.',
         ])->addSubcommand('generateseed', [
-            'help' => 'Generates a seed.php file based on the current database contents.'
+            'help' => 'Generates a seed.php file based on the current database contents.',
         ])->addOption('connection', [
             'help' => 'Connection name to save/load the schema from.',
             'short' => 'c',
-            'default' => 'default'
+            'default' => 'default',
         ])->addOption('path', [
             'help' => 'Path to the schema.php file. Default: config/schema.php',
             'short' => 'p',
-            'default' => 'config/schema.php'
+            'default' => 'config/schema.php',
         ])->addOption('seed', [
             'help' => 'Path to the seed.php file. Default: config/seed.php',
             'short' => 's',
-            'default' => 'config/seed.php'
+            'default' => 'config/seed.php',
         ])->addOption('truncate', [
             'help' => 'Truncate tables before seeding.',
             'short' => 't',
             'boolean' => true,
-            'default' => false
+            'default' => false,
         ])->addOption('no-interaction', [
             'help' => 'Disable any user input. Use the default answers for questions.',
             'short' => 'n',
             'boolean' => true,
-            'default' => false
+            'default' => false,
         ])->addOption('count', [
             'help' => 'Set the limit when generating seed',
-            'default' => false
+            'default' => false,
         ]);
     }
 }

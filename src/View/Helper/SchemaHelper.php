@@ -48,7 +48,7 @@ class SchemaHelper extends Helper
                         'string.escape' => false,
                         'array.base' => 12,
                         'float.integers' => "all",
-                        'float.precision' => false
+                        'float.precision' => false,
                     ]);
                 } else {
                     $val = var_export($value, true);

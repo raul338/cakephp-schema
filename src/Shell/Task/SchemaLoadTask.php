@@ -20,7 +20,7 @@ class SchemaLoadTask extends Shell
     private $_config = [
         'connection' => 'default',
         'path' => 'config/schema.php',
-        'no-interaction' => true
+        'no-interaction' => true,
     ];
 
     /**

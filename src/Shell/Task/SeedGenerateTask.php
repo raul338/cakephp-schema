@@ -22,7 +22,7 @@ class SeedGenerateTask extends SimpleBakeTask
         'connection' => 'default',
         'seed' => 'config/seed.php',
         'path' => 'config/schema.php',
-        'no-interaction' => false
+        'no-interaction' => false,
     ];
 
     /**
@@ -112,7 +112,7 @@ class SeedGenerateTask extends SimpleBakeTask
         }
 
         return [
-            'seedData' => $seedData
+            'seedData' => $seedData,
         ];
     }
 

@@ -10,7 +10,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Filesystem\File;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
-use \Exception;
+use Exception;
 use Schema\Table;
 
 /**
@@ -29,7 +29,7 @@ class SeedImportTask extends Shell
         'connection' => 'default',
         'seed' => 'config/seed.php',
         'truncate' => false,
-        'no-interaction' => false
+        'no-interaction' => false,
     ];
 
     /**

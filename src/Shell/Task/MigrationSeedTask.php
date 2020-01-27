@@ -24,7 +24,7 @@ class MigrationSeedTask extends SeedTask
         $parser = parent::getOptionParser();
         $parser->addOption('records', [
             'boolean' => true,
-            'help' => 'Include records from the database in the seed file'
+            'help' => 'Include records from the database in the seed file',
         ]);
 
         return $parser;
