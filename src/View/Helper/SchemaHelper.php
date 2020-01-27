@@ -14,7 +14,7 @@ class SchemaHelper extends Helper
     /**
      * Default configuration.
      *
-     * @var array
+     * @var array<mixed>
      */
     protected $_defaultConfig = [];
 
@@ -22,7 +22,7 @@ class SchemaHelper extends Helper
      * Generates the PHP array string for an array of records. Will use
      * var_export() and PHPEncoder for more sophisticated types.
      *
-     * @param array $records Array of seed records
+     * @param array<mixed> $records Array of seed records
      * @return string PHP Code
      */
     public function stringifyRecords(array $records)

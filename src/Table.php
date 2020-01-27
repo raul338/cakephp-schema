@@ -12,14 +12,14 @@ class Table extends TableSchema
     /**
      * Foreign keys constraints
      *
-     * @var array
+     * @var array<mixed>
      */
     protected $_foreignKeys = [];
 
     /**
      * Foreign keys constraints represented as SQL statements
      *
-     * @var array
+     * @var array<string>
      */
     protected $_foreignKeysSql = [];
 
@@ -30,7 +30,7 @@ class Table extends TableSchema
      * to generate platform specific SQL.
      *
      * @param Connection $connection The connection to generate SQL for.
-     * @return array List of SQL statements to create the table and the
+     * @return array<string> List of SQL statements to create the table and the
      *    required indexes.
      */
     public function createSql(Connection $connection): array
@@ -44,7 +44,7 @@ class Table extends TableSchema
      * Returns list of ALTER TABLE statements to add foreign key constraints.
      *
      * @param  Connection $connection The connection to generate SQL for.
-     * @return array List of SQL statements to create the foreign keys.
+     * @return array<string> List of SQL statements to create the foreign keys.
      */
     public function foreignKeysSql(Connection $connection)
     {

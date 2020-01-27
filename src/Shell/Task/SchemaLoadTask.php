@@ -16,7 +16,7 @@ class SchemaLoadTask extends Shell
     /**
      * Default configuration.
      *
-     * @var array
+     * @var array<mixed>
      */
     private $_config = [
         'connection' => 'default',
@@ -27,10 +27,10 @@ class SchemaLoadTask extends Shell
     /**
      * Save the schema into lock file.
      *
-     * @param array $options Set connection name and path to save the schema.php file.
+     * @param array<mixed> $options Set connection name and path to save the schema.php file.
      * @return void
      */
-    public function load($options = [])
+    public function load($options = []): void
     {
         $this->_config = array_merge($this->_config, $this->params, $options);
 
@@ -43,10 +43,10 @@ class SchemaLoadTask extends Shell
     /**
      * Drop all tables in the database.
      *
-     * @param array $options Set connection name and path to save the schema.php file.
+     * @param array<mixed> $options Set connection name and path to save the schema.php file.
      * @return void
      */
-    public function drop($options = [])
+    public function drop($options = []): void
     {
         $this->_config = array_merge($this->_config, $this->params, $options);
 
@@ -69,7 +69,7 @@ class SchemaLoadTask extends Shell
     /**
      * Drop existing tables and load new tables into database.
      *
-     * @param  array $tables List of tables and their fields, indexes, ...
+     * @param  array<array<string,mixed>> $tables List of tables and their fields, indexes, ...
      * @return void
      */
     protected function _loadTables($tables)
@@ -112,7 +112,7 @@ class SchemaLoadTask extends Shell
      *
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
      * @param  bool $ask Ask question before generating queries. If false reply, no query is generated.
-     * @return array|false List of SQL statements dropping tables or false if user stopped the deletion.
+     * @return array<string>|false List of SQL statements dropping tables or false if user stopped the deletion.
      */
     protected function _generateDropQueries($db = null, $ask = true)
     {
@@ -161,7 +161,7 @@ class SchemaLoadTask extends Shell
      *
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
      * @param  \Cake\Database\Schema\TableSchema $table Drop foreign keys for this table.
-     * @return array List of SQL statements dropping foreign keys.
+     * @return array<string> List of SQL statements dropping foreign keys.
      */
     protected function _generateDropForeignKeys($db, Schema $table)
     {
@@ -172,6 +172,7 @@ class SchemaLoadTask extends Shell
 
         $queries = [];
         foreach ($table->constraints() as $constraintName) {
+            /** @var array */
             $constraint = $table->getConstraint($constraintName);
             if ($constraint['type'] === Schema::CONSTRAINT_FOREIGN) {
                 // TODO: Move this into the driver
@@ -191,10 +192,10 @@ class SchemaLoadTask extends Shell
      * Executes list of quries in one transaction.
      *
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
-     * @param  array $queries List of SQL statements.
+     * @param  array<string> $queries List of SQL statements.
      * @return void
      */
-    protected function _execute($db, $queries = null)
+    protected function _execute($db, array $queries = []): void
     {
         $logQueries = $db->isQueryLoggingEnabled();
         if ($logQueries) {
@@ -224,9 +225,9 @@ class SchemaLoadTask extends Shell
     protected function _connection()
     {
         $db = ConnectionManager::get($this->_config['connection'], false);
-        if (!method_exists($db, 'schemaCollection')) {
+        if (!method_exists($db, 'getSchemaCollection')) {
             throw new \RuntimeException(
-                'Cannot generate fixtures for connections that do not implement schemaCollection()'
+                'Cannot generate fixtures for connections that do not implement getSchemaCollection()'
             );
         }
 
@@ -237,7 +238,7 @@ class SchemaLoadTask extends Shell
      * Returns the schema array.
      *
      * @param  string $path Path to the schema.php file.
-     * @return array Schema array.
+     * @return array<array<string,mixed>> Schema array.
      */
     protected function _readSchema($path)
     {
@@ -257,7 +258,7 @@ class SchemaLoadTask extends Shell
      * Build the fixtures table schema from the fields property.
      *
      * @param  string $tableName Name of the table.
-     * @param  array $fields Fields saved into the schema.php file.
+     * @param  array<string,mixed> $fields Fields saved into the schema.php file.
      * @return \Cake\Database\Schema\TableSchema Table schema
      */
     protected function _schemaFromFields($tableName, $fields)

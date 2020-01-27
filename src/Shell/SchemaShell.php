@@ -17,7 +17,15 @@ use Schema\Task\SchemaSave;
  */
 class SchemaShell extends Shell
 {
-    public $tasks = ['Schema.SchemaSave', 'Schema.SchemaLoad', 'Schema.SeedImport', 'Schema.SeedGenerate'];
+    /**
+     * @var array<string>
+     */
+    public $tasks = [
+        'Schema.SchemaSave',
+        'Schema.SchemaLoad',
+        'Schema.SeedImport',
+        'Schema.SeedGenerate',
+    ];
 
     /**
      * Constructs this Shell instance.

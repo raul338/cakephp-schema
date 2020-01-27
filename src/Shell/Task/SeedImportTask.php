@@ -18,12 +18,17 @@ use Schema\Table;
  */
 class SeedImportTask extends Shell
 {
-    public $tasks = ['Schema.SeedGenerate'];
+    /**
+     * @var array<string>
+     */
+    public $tasks = [
+        'Schema.SeedGenerate',
+    ];
 
     /**
      * Default configuration.
      *
-     * @var array
+     * @var array<mixed>
      */
     protected $_config = [
         'connection' => 'default',
@@ -34,7 +39,7 @@ class SeedImportTask extends Shell
 
     /**
      * main() method.
-     * @param array $options Set connection name and path to the seed.php file.
+     * @param array<mixed> $options Set connection name and path to the seed.php file.
      * @return bool|int Success or error code.
      */
     public function import(array $options = [])
@@ -57,7 +62,7 @@ class SeedImportTask extends Shell
     /**
      * Insert data from seed.php file into database.
      *
-     * @param array $options Set connection name and path to the seed.php file.
+     * @param array<mixed> $options Set connection name and path to the seed.php file.
      * @return void
      */
     public function seed($options = [])
@@ -79,7 +84,7 @@ class SeedImportTask extends Shell
      * @param  array $data List tables and rows.
      * @return void
      */
-    protected function _truncate($db, $data = null)
+    protected function _truncate($db, array $data)
     {
         if ($this->_config['truncate']) {
             $this->_io->out('Truncating ', 0);
@@ -108,7 +113,7 @@ class SeedImportTask extends Shell
     protected function _truncateTable($db, $table)
     {
         $schema = $db->getSchemaCollection()->describe($table);
-        if (!$table instanceof TableSchema) {
+        if (!$schema instanceof TableSchema) {
             trigger_error("Table $table did not return \Cake\Database\Schema\TableSchema", E_USER_WARNING);
 
             return;
@@ -126,7 +131,7 @@ class SeedImportTask extends Shell
      * @param  array $data List tables and rows.
      * @return void
      */
-    protected function _insert($db, $data = null)
+    protected function _insert($db, array $data)
     {
         $this->_io->out('Seeding ', 0);
 
@@ -227,10 +232,10 @@ class SeedImportTask extends Shell
     /**
      * Prepare table for data insertion.
      * @param \Cake\Database\Connection $db Connection
-     * @param \Schema\Table $table Table
+     * @param string $table Table
      * @return void
      */
-    protected function _beforeTableInsert($db, $table)
+    protected function _beforeTableInsert($db, string $table)
     {
         // TODO: Move this into the driver
         if ($db->getDriver() instanceof Sqlserver) {
@@ -242,7 +247,7 @@ class SeedImportTask extends Shell
     /**
      * Clean after inserting.
      * @param \Cake\Database\Connection $db Connection
-     * @param \Schema\Table $table Table
+     * @param string $table Table
      * @return void
      */
     protected function _afterTableInsert($db, $table)
@@ -263,9 +268,9 @@ class SeedImportTask extends Shell
     protected function _connection()
     {
         $db = ConnectionManager::get($this->_config['connection'], false);
-        if (!method_exists($db, 'schemaCollection')) {
+        if (!method_exists($db, 'getSchemaCollection')) {
             throw new \RuntimeException(
-                'Cannot generate fixtures for connections that do not implement schemaCollection()'
+                'Cannot generate fixtures for connections that do not implement getSchemaCollection()'
             );
         }
 

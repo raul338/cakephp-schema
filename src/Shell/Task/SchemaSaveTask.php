@@ -12,7 +12,7 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * Default configuration.
      *
-     * @var array
+     * @var array<mixed>
      */
     private $_config = [
         'connection' => 'default',
@@ -54,6 +54,7 @@ class SchemaSaveTask extends SimpleBakeTask
 
     /**
      * {@inheritdoc}
+     * @return array<mixed>
      */
     public function templateData(): array
     {
@@ -127,16 +128,19 @@ class SchemaSaveTask extends SimpleBakeTask
     {
         $cols = $indexes = $constraints = [];
         foreach ($table->columns() as $field) {
+            /** @var array */
             $fieldData = $table->getColumn($field);
             $properties = implode(', ', $this->_values($fieldData));
             $cols[] = "            '$field' => [$properties],";
         }
         foreach ($table->indexes() as $index) {
+            /** @var array */
             $fieldData = $table->getIndex($index);
             $properties = implode(', ', $this->_values($fieldData));
             $indexes[] = "                '$index' => [$properties],";
         }
         foreach ($table->constraints() as $index) {
+            /** @var array */
             $fieldData = $table->getConstraint($index);
             $properties = implode(', ', $this->_values($fieldData));
             $constraints[] = "                '$index' => [$properties],";

@@ -12,8 +12,12 @@ use Riimu\Kit\PHPEncoder\PHPEncoder;
  */
 class MigrationSeedTask extends SeedTask
 {
-
-    public $tasks = ['Schema.SeedGenerate'];
+    /**
+     * @var array<string>
+     */
+    public $tasks = [
+        'Schema.SeedGenerate',
+    ];
 
     /**
      * Gets the option parser instance and configures it.
@@ -34,7 +38,7 @@ class MigrationSeedTask extends SeedTask
     /**
      * Data provider for the template. Overridden to include records if needed.
      *
-     * @return array
+     * @return array<mixed>
      */
     public function templateData(): array
     {
@@ -55,7 +59,7 @@ class MigrationSeedTask extends SeedTask
      * Generates the PHP array string for an array of records. Will use
      * var_export() and PHPEncoder for more sophisticated types.
      *
-     * @param array $records Array of seed records
+     * @param array<array<string,mixed>> $records Array of seed records
      * @return string PHP Code
      */
     public function stringifyRecords(array $records)

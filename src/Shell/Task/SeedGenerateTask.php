@@ -60,7 +60,7 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * main() method.
      * @param array $options Bake options
-     * @return bool|int Success or error code.
+     * @return string
      */
     public function generate(array $options = [])
     {
@@ -121,10 +121,10 @@ class SeedGenerateTask extends SimpleBakeTask
      * to build a fixture.
      *
      * @param string $modelName name of the model to take records from.
-     * @param string|null $useTable Name of table to use.
+     * @param string $useTable Name of table to use.
      * @return \Cake\ORM\Query Array of records.
      */
-    public function getRecordsFromTable($modelName, $useTable = null)
+    public function getRecordsFromTable($modelName, string $useTable)
     {
         $recordCount = (isset($this->params['count']) ? $this->params['count'] : false);
         $conditions = (isset($this->params['conditions']) ? $this->params['conditions'] : '1=1');
