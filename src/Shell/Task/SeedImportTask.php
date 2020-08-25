@@ -50,6 +50,8 @@ class SeedImportTask extends Shell
             }
         }
         $this->seed();
+
+        return self::CODE_SUCCESS;
     }
 
     /**
