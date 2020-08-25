@@ -1,6 +1,8 @@
-# Schema plugin for CakePHP 3.6
+# Schema plugin for CakePHP 3.x
 
 Save the schema into one file and then restore the database from the schema file. The schema is automatically saved when executing `cake migrations migrate`.
+
+Requires CakePHP >= 3.6
 
 ## Supported datasources
 
@@ -16,13 +18,19 @@ You can install this plugin into your CakePHP application using [composer](http:
 The recommended way to install composer packages is:
 
 ```
-composer require scherersoftware/cakephp-schema
+composer require raul338/cakephp-schema
 ```
 
-Update your `config/bootstrap.php``:
+Then load it on you Applicationn bootstrap method
+```
+protected function bootstrapCli()
+{
+    // on 3.9 - so it does not load in production
+    $this->addOptionalPlugin('Schema');
 
-```PHP
-Plugin::load('Schema', ['bootstrap' => true]);
+    // prior to 3.9
+    $this->addPlugin('Schema');
+}
 ```
 
 ## Usage
@@ -103,17 +111,17 @@ Seed commands will take the following options:
     cake schema save --path config/schema/schema.lock
     cake schema load --connection test --path config/schema/schema.lock --no-interaction
 
-# To only drop all tables in database
+### To only drop all tables in database
 
     cake schema drop
     cake schema drop --connection test
 
-# Seeding Examples
+### Seeding Examples
 
     cake schema seed --truncate
     cake schema generateseed --seed config/my_seed.php
 
-# Seeding for Migrations Plugin / phinx
+## Seeding for Migrations Plugin / phinx
 
 This plugin provides a bake task extending the `seed` bake task provided by the `cakephp/migrations` plugin, but with automated inclusion of seed data from the database.
 
@@ -122,6 +130,14 @@ Example usage:
     bin/cake bake migration_seed Users --records
 
 This will write a new file into `src/config/Seeds/UsersSeed.php` including all records currently present in the DB's users table.
+
+## Fixture generation
+
+This plugins allows to use generated schema and seeds as fixture model and data, by using a `SchemaFixture`. You can extend your fixtures just like the book indicates.
+
+Example usage:
+
+    bin/cake bake fixture --theme Schema Users
 
 ## TODO
  
