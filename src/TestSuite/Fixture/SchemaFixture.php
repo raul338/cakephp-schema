@@ -26,10 +26,15 @@ class SchemaFixture extends TestFixture
         $className = substr($className, 0, strlen('Fixture') * -1);
         $className = Inflector::underscore($className);
 
-        $ret = require ROOT . DS . 'config' . DS . 'schema.php';
-        if (array_key_exists($className, $ret['tables'])) {
-            $this->fields = $ret['tables'][$className];
+        $file = ROOT . DS . 'config' . DS . 'schema.php';
+        if (!file_exists($file)) {
+            throw new \RuntimeException('Seed file does not exists. Please run bin/cake schema generateseed');
         }
+        $ret = require $file;
+        if (!array_key_exists($className, $ret['tables'])) {
+            throw new \RuntimeException(sprintf('Unable to retrieve fixture: Table `%s` does not exist in saved schema.', $className));
+        }
+        $this->fields = $ret['tables'][$className];
         if (file_exists($this->seedFile)) {
             $ret = require $this->seedFile;
             if (array_key_exists($className, $ret)) {
