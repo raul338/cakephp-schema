@@ -24,7 +24,7 @@ class SchemaFixture extends TestFixture
     {
         list($namespace, $className) = namespaceSplit(get_called_class());
         $className = substr($className, 0, strlen('Fixture') * -1);
-        $className = Inflector::underscore($className);
+        $className = Inflector::tableize($className);
 
         $file = ROOT . DS . 'config' . DS . 'schema.php';
         if (!file_exists($file)) {
