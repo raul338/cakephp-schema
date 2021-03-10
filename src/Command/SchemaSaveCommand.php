@@ -19,7 +19,6 @@ class SchemaSaveCommand extends SimpleBakeCommand
      */
     private $_config = [
         'path' => 'config/schema.php',
-        'no-interaction' => true,
     ];
 
     /**
@@ -79,15 +78,16 @@ class SchemaSaveCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    public function execute(Arguments $args, ConsoleIo $io): ?int
     {
         $this->_config = [
-            'path' => $args->getOption('path'),
-            'no-interaction' => $args->getOption('no-interaction'),
+            'path' => $args->getOption('path') ?: 'config/schema.php',
         ];
         $this->tables = $this->_describeTables($args, $io);
 
-        parent::bake($name, $args, $io);
+        parent::bake('schema', $args, $io);
+
+        return self::CODE_SUCCESS;
     }
 
     /**
@@ -206,10 +206,6 @@ class SchemaSaveCommand extends SimpleBakeCommand
             ])
             ->addOption('path', [
                 'default' => 'config/schema.php',
-            ])
-            ->addOption('no-interaction', [
-                'boolean' => true,
-                'short' => 'n',
             ]);
     }
 }
