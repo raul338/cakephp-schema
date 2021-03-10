@@ -1,86 +1,67 @@
 <?php
 declare(strict_types=1);
 
-namespace Schema\Shell\Task;
+namespace Schema\Command;
 
-use Cake\Console\Shell;
+use Cake\Command\Command;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Connection;
 use Cake\Database\Driver\Mysql;
-use Cake\Database\Schema\TableSchema as Schema;
 use Cake\Database\Schema\TableSchema;
+use Cake\Database\Schema\TableSchema as Schema;
+use Cake\Datasource\ConnectionInterface;
 use Cake\Datasource\ConnectionManager;
-use Exception;
 use Schema\Table;
 
-class SchemaLoadTask extends Shell
+class SchemaLoadCommand extends Command
 {
     /**
      * Default configuration.
      *
      * @var array<mixed>
      */
-    private $_config = [
+    protected $_config = [
         'connection' => 'default',
-        'path' => 'config/schema.php',
         'no-interaction' => true,
     ];
 
     /**
-     * Save the schema into lock file.
-     *
-     * @param array<mixed> $options Set connection name and path to save the schema.php file.
-     * @return void
+     * @inheritDoc
      */
-    public function load($options = []): void
+    public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->_config = array_merge($this->_config, $this->params, $options);
+        $this->_config = [
+            'connection' => $args->getOption('conneciton'),
+            'no-interaction' => $args->getOption('no-interaction'),
+        ];
 
-        $path = $this->_config['path'];
-        $data = $this->_readSchema($path);
-
-        $this->_loadTables($data['tables']);
-    }
-
-    /**
-     * Drop all tables in the database.
-     *
-     * @param array<mixed> $options Set connection name and path to save the schema.php file.
-     * @return void
-     */
-    public function drop($options = []): void
-    {
-        $this->_config = array_merge($this->_config, $this->params, $options);
-
-        $path = $this->_config['path'];
-        $data = $this->_readSchema($path);
-
-        $queries = $this->_generateDropQueries();
-
-        if ($queries === false) {
-            $this->_io->err(sprintf('<error>Deletion was terminated by the user.</error>.'), 2);
-
-            return;
+        $path = $args->getOption('path');
+        if (!is_string($path)) {
+            throw new \InvalidArgumentException('`path` option is not a string');
         }
+        $data = $this->_readSchema($path);
 
-        $this->_execute($this->_connection(), $queries);
-        $this->_io->out(); // New line
-        $this->_io->out(sprintf('<success>%d queries were executed.</success> ', count($queries)));
+        $this->_loadTables($io, $data['tables']);
     }
 
     /**
      * Drop existing tables and load new tables into database.
      *
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @param  array<array<string,mixed>> $tables List of tables and their fields, indexes, ...
      * @return void
      */
-    protected function _loadTables($tables)
+    protected function _loadTables(ConsoleIo $io, array $tables)
     {
-        $this->_io->out('Loading the schema from the file ', 0);
+        $io->out('Loading the schema from the file ', 0);
 
         $db = $this->_connection();
-        $queries = $this->_generateDropQueries($db);
+        $queries = $this->_generateDropQueries($io, $db);
 
         if ($queries === false) {
-            $this->_io->err(sprintf('<error>Schema was not loaded</error>.'), 2);
+            $io->err(sprintf('<error>Schema was not loaded</error>.'), 2);
 
             return;
         }
@@ -101,20 +82,21 @@ class SchemaLoadTask extends Shell
             $queries = array_merge($queries, $foreignKeys);
         }
 
-        $this->_execute($db, $queries);
+        $this->_execute($io, $db, $queries);
 
-        $this->_io->out(); // New line
-        $this->_io->out(sprintf('<success>%d tables were loaded.</success> ', count($tables)));
+        $io->out(); // New line
+        $io->out(sprintf('<success>%d tables were loaded.</success> ', count($tables)));
     }
 
     /**
      * Returns queries to drop all tables in the database.
      *
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
      * @param  bool $ask Ask question before generating queries. If false reply, no query is generated.
      * @return array<string>|false List of SQL statements dropping tables or false if user stopped the deletion.
      */
-    protected function _generateDropQueries($db = null, $ask = true)
+    protected function _generateDropQueries(ConsoleIo $io, $db = null, $ask = true)
     {
         if ($db === null) {
             $db = $this->_connection();
@@ -124,12 +106,12 @@ class SchemaLoadTask extends Shell
         $tables = $schemaCollection->listTables();
 
         if (count($tables) > 0 && !$this->_config['no-interaction']) {
-            $this->_io->out();
-            $this->_io->out(sprintf(
+            $io->out();
+            $io->out(sprintf(
                 '<warning>Database is not empty. %d tables will be deleted.</warning>',
                 count($tables)
             ));
-            $key = $this->_io->askChoice('Do you want to continue?', ['y', 'n'], 'y');
+            $key = $io->askChoice('Do you want to continue?', ['y', 'n'], 'y');
             if ($key === 'n') {
                 return false;
             }
@@ -139,7 +121,7 @@ class SchemaLoadTask extends Shell
         $dropTables = [];
 
         foreach ($tables as $tableName) {
-            $this->_io->out('.', 0);
+            $io->out('.', 0);
             $table = $schemaCollection->describe($tableName);
             if (!$table instanceof TableSchema) {
                 trigger_error("Table $tableName did not return \Cake\Database\Schema\TableSchema", E_USER_WARNING);
@@ -157,13 +139,42 @@ class SchemaLoadTask extends Shell
     }
 
     /**
+     * Executes list of quries in one transaction.
+     *
+     * @param \Cake\Console\ConsoleIo $io Console IO
+     * @param \Cake\Datasource\ConnectionInterface $db Connection to run the SQL queries on.
+     * @param  array<string> $queries List of SQL statements.
+     * @return void
+     */
+    protected function _execute(ConsoleIo $io, $db, array $queries = []): void
+    {
+        $logQueries = $db->isQueryLoggingEnabled();
+        if ($logQueries) {
+            $db->enableQueryLogging(false);
+        }
+
+        $db->transactional(function ($db) use ($queries, $io) {
+            $db->disableForeignKeys();
+            foreach ($queries as $query) {
+                $io->out('.', 0);
+                $db->execute($query)->closeCursor();
+            }
+            $db->enableForeignKeys();
+        });
+
+        if ($logQueries) {
+            $db->enableQueryLogging(true);
+        }
+    }
+
+    /**
      * Generates SQL statements dropping foreign keys for the table.
      *
-     * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
+     * @param \Cake\Datasource\ConnectionInterface $db Connection to run the SQL queries on.
      * @param  \Cake\Database\Schema\TableSchema $table Drop foreign keys for this table.
      * @return array<string> List of SQL statements dropping foreign keys.
      */
-    protected function _generateDropForeignKeys($db, Schema $table)
+    protected function _generateDropForeignKeys(ConnectionInterface $db, Schema $table): array
     {
         $type = 'other';
         if ($db->getDriver() instanceof Mysql) {
@@ -173,7 +184,7 @@ class SchemaLoadTask extends Shell
         $queries = [];
         foreach ($table->constraints() as $constraintName) {
             $constraint = $table->getConstraint($constraintName);
-            if ($constraint['type'] === Schema::CONSTRAINT_FOREIGN) {
+            if ($constraint && $constraint['type'] === Schema::CONSTRAINT_FOREIGN) {
                 // TODO: Move this into the driver
                 if ($type === 'mysql') {
                     $template = 'ALTER TABLE %s DROP FOREIGN KEY %s';
@@ -188,49 +199,19 @@ class SchemaLoadTask extends Shell
     }
 
     /**
-     * Executes list of quries in one transaction.
-     *
-     * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
-     * @param  array<string> $queries List of SQL statements.
-     * @return void
-     */
-    protected function _execute($db, array $queries = []): void
-    {
-        $logQueries = $db->isQueryLoggingEnabled();
-        if ($logQueries) {
-            $db->enableQueryLogging(false);
-        }
-
-        $db->transactional(function ($db) use ($queries) {
-            $db->disableForeignKeys();
-            foreach ($queries as $query) {
-                $this->_io->out('.', 0);
-                $db->execute($query)->closeCursor();
-            }
-            $db->enableForeignKeys();
-        });
-
-        if ($logQueries) {
-            $db->enableQueryLogging(true);
-        }
-    }
-
-    /**
      * Returns the database connection.
      *
      * @return \Cake\Database\Connection Object.
-     * @throws  \RuntimeException If the connection does not implement schemaCollection()
+     * @throws \RuntimeException on unsupported connections
      */
-    protected function _connection()
+    protected function _connection(): Connection
     {
-        $db = ConnectionManager::get($this->_config['connection'], false);
-        if (!method_exists($db, 'getSchemaCollection')) {
-            throw new \RuntimeException(
-                'Cannot generate fixtures for connections that do not implement getSchemaCollection()'
-            );
+        $connection = ConnectionManager::get($this->_config['connection'], false);
+        if (!$connection instanceof Connection) {
+            throw new \RuntimeException('Connection must be of subtype Connection');
         }
 
-        return $db;
+        return $connection;
     }
 
     /**
@@ -239,10 +220,10 @@ class SchemaLoadTask extends Shell
      * @param  string $path Path to the schema.php file.
      * @return array<array<string,mixed>> Schema array.
      */
-    protected function _readSchema($path)
+    protected function _readSchema($path): array
     {
         if (!file_exists($path)) {
-            throw new Exception(sprintf('Schema file "%s" does not exist.', $path));
+            throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $path));
         }
 
         $return = include $path;
@@ -250,7 +231,7 @@ class SchemaLoadTask extends Shell
             return $return;
         }
 
-        throw new Exception(sprintf('Schema file "%s" did not return an array.', $path));
+        throw new \RuntimeException(sprintf('Schema file "%s" did not return an array.', $path));
     }
 
     /**
@@ -258,9 +239,9 @@ class SchemaLoadTask extends Shell
      *
      * @param  string $tableName Name of the table.
      * @param  array<string,mixed> $fields Fields saved into the schema.php file.
-     * @return \Cake\Database\Schema\TableSchema Table schema
+     * @return \Schema\Table Table schema
      */
-    protected function _schemaFromFields($tableName, $fields)
+    protected function _schemaFromFields(string $tableName, array $fields): Table
     {
         $schema = new Table($tableName);
         foreach ($fields as $field => $data) {
@@ -284,5 +265,24 @@ class SchemaLoadTask extends Shell
         }
 
         return $schema;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        return parent::buildOptionParser($parser)
+            ->addOption('connection', [
+                'default' => 'default',
+                'short' => 'c',
+            ])
+            ->addOption('path', [
+                'default' => 'config/schema.php',
+            ])
+            ->addOption('no-interaction', [
+                'boolean' => true,
+                'short' => 'n',
+            ]);
     }
 }
