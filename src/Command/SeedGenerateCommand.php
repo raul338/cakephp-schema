@@ -11,8 +11,8 @@ use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
-use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
+use Schema\Helper;
 
 class SeedGenerateCommand extends SimpleBakeCommand
 {
@@ -28,6 +28,11 @@ class SeedGenerateCommand extends SimpleBakeCommand
         'count' => false,
         'conditions' => '1=1',
     ];
+
+    /**
+     * @var \Schema\Helper
+     */
+    protected $helper = null;
 
     /**
      * @inheritDoc
@@ -85,6 +90,8 @@ class SeedGenerateCommand extends SimpleBakeCommand
             throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $this->_config['path']));
         }
 
+        $this->helper = new Helper();
+
         parent::bake($name, $args, $io);
     }
 
@@ -131,7 +138,7 @@ class SeedGenerateCommand extends SimpleBakeCommand
     {
         $recordCount = (filter_var($this->_config['count'], FILTER_VALIDATE_INT) ?? false);
         $conditions = ($this->_config['conditions'] ?? '1=1');
-        $model = $this->findModel($modelName, $useTable);
+        $model = $this->helper->findModel($this->_config['connection'], $modelName, $useTable);
 
         $records = $model->find('all')
             ->where($conditions)
@@ -142,36 +149,6 @@ class SeedGenerateCommand extends SimpleBakeCommand
         }
 
         return $records;
-    }
-
-    /**
-     * Return a Table instance for the given model.
-     *
-     * @param string $modelName Camelized model name
-     * @param string $useTable Table to use
-     * @return \Cake\ORM\Table
-     */
-    public function findModel(string $modelName, string $useTable)
-    {
-        $options = ['connectionName' => $this->_config['connection']];
-        $model = TableRegistry::getTableLocator()->get($modelName, $options);
-        // This means we have not found a Table implementation in the app namespace
-        // Iterate through loaded plugins and try to find the table
-        if (get_class($model) === 'Cake\ORM\Table') {
-            foreach (\Cake\Core\Plugin::loaded() as $plugin) {
-                $ret = TableRegistry::getTableLocator()->get("{$plugin}.{$modelName}", $options);
-                if (get_class($ret) !== 'Cake\ORM\Table') {
-                    $model = $ret;
-                }
-            }
-        }
-        /*
-        if (get_class($model) === 'Cake\ORM\Table') {
-            $this->out('Warning: Using Auto-Table for ' . $modelName);
-        }
-        */
-
-        return $model;
     }
 
     /**

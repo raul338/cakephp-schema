@@ -1,19 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Schema\Shell\Task;
+namespace Schema\Command;
 
-use Cake\Console\Shell;
+use Cake\Command\Command;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Connection;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Exception;
+use Schema\Helper;
 use Schema\Table;
 
-/**
- * @property \Schema\Shell\Task\SeedGenerateTask $SeedGenerate
- */
-class SeedImportTask extends Shell
+class SeedCommand extends Command
 {
     /**
      * @var array<string>
@@ -35,69 +36,70 @@ class SeedImportTask extends Shell
     ];
 
     /**
-     * main() method.
-     *
-     * @param array<mixed> $options Set connection name and path to the seed.php file.
-     * @return bool|int Success or error code.
+     * @var \Schema\Helper
      */
-    public function import(array $options = [])
-    {
-        $this->_config = array_merge($this->_config, $this->params, $options);
-
-        if (!$this->_config['no-interaction'] && $this->_config['truncate']) {
-            $this->_io->out();
-            $this->_io->out('<warning>All database tables will be truncated before seeding.</warning>');
-            $key = $this->_io->askChoice('Do you want to continue?', ['y', 'n'], 'y');
-            if ($key === 'n') {
-                return false;
-            }
-        }
-        $this->seed();
-
-        return true;
-    }
+    protected $helper = null;
 
     /**
-     * Insert data from seed.php file into database.
-     *
-     * @param array<mixed> $options Set connection name and path to the seed.php file.
-     * @return void
+     * @inheritDoc
      */
-    public function seed($options = [])
+    public function execute(Arguments $args, ConsoleIo $io)
     {
-        $this->_config = array_merge($this->_config, $this->params, $options);
+        $this->_config = [
+            'connection' => $args->getOption('connection'),
+            'seed' => $args->getOption('seed'),
+            'truncate' => filter_var($args->getOption('truncate'), FILTER_VALIDATE_BOOLEAN),
+            'no-interaction' => filter_var($args->getOption('no-interaction'), FILTER_VALIDATE_BOOLEAN),
+        ];
+
+        if (!$this->_config['no-interaction'] && $this->_config['truncate']) {
+            $io->out();
+            $io->out('<warning>All database tables will be truncated before seeding.</warning>');
+            $key = $io->askChoice('Do you want to continue?', ['y', 'n'], 'y');
+            if ($key === 'n') {
+                return self::CODE_ERROR;
+            }
+        }
+        if (!is_string($this->_config['seed']) || !file_exists($this->_config['seed'])) {
+            throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $this->_config['seed']));
+        }
+
+        $this->helper = new Helper();
 
         $data = $this->_readSeed($this->_config['seed']);
 
         $db = $this->_connection();
 
-        $this->_truncate($db, $data);
-        $this->_insert($db, $data);
+        $this->_truncate($io, $db, $data);
+        $this->_insert($io, $db, $data);
+
+        return self::CODE_SUCCESS;
     }
 
     /**
      * Truncate the tables if requested. Because of postgres it must run in separate transaction.
      *
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
      * @param  array $data List tables and rows.
      * @return void
      */
-    protected function _truncate($db, array $data)
+    protected function _truncate(ConsoleIo $io, Connection $db, array $data): void
     {
         if ($this->_config['truncate']) {
-            $this->_io->out('Truncating ', 0);
+            $io->out('Truncating ', 0);
 
-            $operation = function ($db) use ($data) {
+            $operation = function ($db) use ($data, $io) {
                 $db->disableForeignKeys();
                 foreach ($data as $table => $rows) {
-                    $this->_io->out('.', 0);
+                    $io->out('.', 0);
                     $this->_truncateTable($db, $table);
                 }
                 $db->enableForeignKeys();
             };
 
             $this->_runOperation($db, $operation);
-            $this->_io->out(); // New line
+            $io->out(); // New line
         }
     }
 
@@ -108,7 +110,7 @@ class SeedImportTask extends Shell
      * @param  string $table Table name.
      * @return void
      */
-    protected function _truncateTable($db, $table)
+    protected function _truncateTable(Connection $db, string $table): void
     {
         $schema = $db->getSchemaCollection()->describe($table);
         if (!$schema instanceof TableSchema) {
@@ -125,57 +127,53 @@ class SeedImportTask extends Shell
     /**
      * Insert data into tables.
      *
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @param \Cake\Database\Connection $db Connection to run the SQL queries on.
-     * @param  array $data List tables and rows.
+     * @param array $data List tables and rows.
      * @return void
      */
-    protected function _insert($db, array $data)
+    protected function _insert(ConsoleIo $io, Connection $db, array $data)
     {
-        $this->_io->out('Seeding ', 0);
+        $io->out('Seeding ', 0);
 
-        $operation = function ($db) use ($data) {
+        $operation = function ($db) use ($data, $io) {
             $db->disableForeignKeys();
             foreach ($data as $table => $rows) {
-                $this->_io->verbose("Seeding table $table", 0);
-                $this->_io->out('.', 0);
+                $io->verbose("Seeding table $table", 0);
+                $io->out('.', 0);
 
                 $this->_beforeTableInsert($db, $table);
-                $this->_insertTable($db, $table, $rows);
+                $this->_insertTable($io, $db, $table, $rows);
                 $this->_afterTableInsert($db, $table);
 
-                $this->_io->verbose('');
+                $io->verbose('');
             }
             $db->enableForeignKeys();
         };
 
         $this->_runOperation($db, $operation);
-        $this->_io->out(); // New line
+        $io->out(); // New line
     }
 
     /**
      * Insert data into table.
      *
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @param  \Cake\Database\Connection $db Connection where table is stored.
      * @param  string $table Table name.
      * @param  array $rows Data to be stored.
      * @return void
      */
-    protected function _insertTable($db, $table, $rows)
+    protected function _insertTable(ConsoleIo $io, Connection $db, string $table, array $rows): void
     {
         $modelName = \Cake\Utility\Inflector::camelize($table);
-        $model = $this->SeedGenerate->findModel($modelName, $table);
+        $model = $this->helper->findModel($this->_config['connection'], $modelName, $table);
 
-        try {
-            foreach ($rows as $row) {
-                $query = $model->query();
-                $query->insert(array_keys($row))
-                    ->values($row)->execute();
-
-                continue;
-            }
-        } catch (Exception $e) {
-            $this->_io->err($e->getMessage());
-            exit(1);
+        foreach ($rows as $row) {
+            $query = $model->query();
+            $query->insert(array_keys($row))
+                ->values($row)
+                ->execute();
         }
     }
 
@@ -186,7 +184,7 @@ class SeedImportTask extends Shell
      * @param  callable $operation Operation to run.
      * @return void
      */
-    protected function _runOperation($db, $operation)
+    protected function _runOperation(Connection $db, callable $operation): void
     {
         $logQueries = $db->isQueryLoggingEnabled();
         if ($logQueries) {
@@ -217,7 +215,7 @@ class SeedImportTask extends Shell
         }
         $fields = array_values(array_unique($fields));
         foreach ($fields as $field) {
-            $types[$field] = $schema->getColumnType($field);
+            $types[$field] = $schema->getColumnType($field . ''); // trick phpstan
         }
         $default = array_fill_keys($fields, null);
         foreach ($records as $record) {
@@ -265,13 +263,11 @@ class SeedImportTask extends Shell
      * @return \Cake\Database\Connection Object.
      * @throws  \RuntimeException If the connection does not implement schemaCollection()
      */
-    protected function _connection()
+    protected function _connection(): Connection
     {
         $db = ConnectionManager::get($this->_config['connection'], false);
-        if (!method_exists($db, 'getSchemaCollection')) {
-            throw new \RuntimeException(
-                'Cannot generate fixtures for connections that do not implement getSchemaCollection()'
-            );
+        if (!$db instanceof Connection) {
+            throw new \RuntimeException('Connection must be a subtype of \Cake\Database\Connection');
         }
 
         return $db;
@@ -283,7 +279,7 @@ class SeedImportTask extends Shell
      * @param  string $path Path to the seed.php file.
      * @return array Data array.
      */
-    protected function _readSeed($path)
+    protected function _readSeed(string $path): array
     {
         if (file_exists($path)) {
             $return = include $path;
@@ -293,5 +289,32 @@ class SeedImportTask extends Shell
         }
 
         return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        return parent::buildOptionParser($parser)
+            ->addOption('connection', [
+                'default' => 'default',
+                'short' => 'c',
+            ])
+            ->addOption('seed', [
+                'help' => 'Path to the seed.php file.',
+                'short' => 's',
+                'default' => 'config/seed.php',
+            ])
+            ->addOption('truncate', [
+                'help' => 'Truncate tables before seeding.',
+                'short' => 't',
+                'boolean' => true,
+                'default' => false,
+            ])
+            ->addOption('no-interaction', [
+                'boolean' => true,
+                'short' => 'n',
+            ]);
     }
 }

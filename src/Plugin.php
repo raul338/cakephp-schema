@@ -8,6 +8,7 @@ use Cake\Core\BasePlugin;
 use Schema\Command\SchemaDropCommand;
 use Schema\Command\SchemaLoadCommand;
 use Schema\Command\SchemaSaveCommand;
+use Schema\Command\SeedCommand;
 use Schema\Command\SeedGenerateCommand;
 
 class Plugin extends BasePlugin
@@ -21,6 +22,7 @@ class Plugin extends BasePlugin
         $commands->add('schema drop', SchemaDropCommand::class);
         $commands->add('schema load', SchemaLoadCommand::class);
         $commands->add('seed generate', SeedGenerateCommand::class);
+        $commands->add('seed', SeedCommand::class);
 
         return parent::console($commands);
     }
