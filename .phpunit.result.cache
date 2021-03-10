@@ -1,1 +1,0 @@
-C:37:"PHPUnit\Runner\DefaultTestResultCache":198:{a:2:{s:7:"defects";a:1:{s:63:"Schema\Test\TestCase\Command\SchemaSaveCommandTest::testExecute";i:3;}s:5:"times";a:1:{s:63:"Schema\Test\TestCase\Command\SchemaSaveCommandTest::testExecute";d:0.065;}}}
