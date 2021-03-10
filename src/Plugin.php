@@ -21,8 +21,8 @@ class Plugin extends BasePlugin
         $commands->add('schema save', SchemaSaveCommand::class);
         $commands->add('schema drop', SchemaDropCommand::class);
         $commands->add('schema load', SchemaLoadCommand::class);
-        $commands->add('seed generate', SeedGenerateCommand::class);
-        $commands->add('seed', SeedCommand::class);
+        $commands->add('schema generateseed', SeedGenerateCommand::class);
+        $commands->add('schema seed', SeedCommand::class);
 
         return parent::console($commands);
     }
