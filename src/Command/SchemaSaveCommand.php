@@ -1,13 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Schema\Shell\Task;
+namespace Schema\Command;
 
-use Bake\Shell\Task\SimpleBakeTask;
-use Cake\Database\Schema\TableSchema;
+use Bake\Command\SimpleBakeCommand;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
+use Cake\Database\Schema\TableSchemaInterface;
 use Cake\Datasource\ConnectionManager;
 
-class SchemaSaveTask extends SimpleBakeTask
+class SchemaSaveCommand extends SimpleBakeCommand
 {
     /**
      * Default configuration.
@@ -15,10 +18,14 @@ class SchemaSaveTask extends SimpleBakeTask
      * @var array<mixed>
      */
     private $_config = [
-        'connection' => 'default',
         'path' => 'config/schema.php',
         'no-interaction' => true,
     ];
+
+    /**
+     * @var array<string,\Cake\Database\Schema\TableSchema|\Cake\Database\Schema\TableSchemaInterface>
+     */
+    private $tables;
 
     /**
      * @inheritDoc
@@ -47,22 +54,19 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * @inheritDoc
      */
-    public function getPath(): string
+    public function getPath(Arguments $args): string
     {
         return ROOT . DS;
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return array<mixed>
+     * @inheritDoc
      */
-    public function templateData(): array
+    public function templateData(Arguments $args): array
     {
         $tables = '';
 
-        $data = $this->_describeTables();
-        foreach ($data as $name => $table) {
+        foreach ($this->tables as $name => $table) {
             $schema = $this->_generateSchema($table);
             $tables .= "        '$name' => $schema,\n";
         }
@@ -73,48 +77,48 @@ class SchemaSaveTask extends SimpleBakeTask
     }
 
     /**
-     * Save the schema into lock file.
-     *
-     * @param array $options Set connection name and path to save the schema.lock file.
-     * @return void
+     * @inheritDoc
      */
-    public function save($options = [])
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
-        $this->_config = array_merge($this->_config, $this->params, $options);
-        if ($this->_config['no-interaction']) {
-            $this->interactive = false;
-        }
-        parent::bake('schema');
+        $this->_config = [
+            'path' => $args->getOption('path'),
+            'no-interaction' => $args->getOption('no-interaction'),
+        ];
+        $this->tables = $this->_describeTables($args, $io);
+
+        parent::bake($name, $args, $io);
     }
 
     /**
      * Returns list of all tables and their Schema objects.
      *
+     * @param \Cake\Console\Arguments $args Command Arguments
+     * @param \Cake\Console\ConsoleIo $io Console IO
      * @return array List of tables schema indexed by table name.
      */
-    protected function _describeTables()
+    protected function _describeTables(Arguments $args, ConsoleIo $io)
     {
-        $this->_io->out(sprintf(
+        $connectionName = $args->getOption('connection');
+        if (!is_string($connectionName)) {
+            throw new \InvalidArgumentException('connection option must be an string');
+        }
+        $io->out(sprintf(
             'Reading the schema from the `%s` database ',
-            $this->_config['connection']
+            $connectionName
         ), 0);
 
-        $connection = ConnectionManager::get($this->_config['connection'], false);
-        if (!method_exists($connection, 'schemaCollection')) {
-            throw new \RuntimeException(
-                'Cannot generate fixtures for connections that do not implement schemaCollection()'
-            );
-        }
+        $connection = ConnectionManager::get($connectionName, false);
         $schemaCollection = $connection->getSchemaCollection();
         $tables = $schemaCollection->listTables();
 
         $data = [];
         foreach ($tables as $table) {
-            $this->_io->out('.', 0);
+            $io->out('.', 0);
             $data[$table] = $schemaCollection->describe($table);
         }
 
-        $this->_io->out(); // New line
+        $io->out(); // New line
 
         return $data;
     }
@@ -122,10 +126,10 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * Generates a string representation of a schema.
      *
-     * @param \Cake\Database\Schema\TableSchema $table Table schema.
+     * @param \Cake\Database\Schema\TableSchemaInterface $table Table schema.
      * @return string fields definitions
      */
-    protected function _generateSchema(TableSchema $table)
+    protected function _generateSchema(TableSchemaInterface $table)
     {
         $cols = $indexes = $constraints = [];
         foreach ($table->columns() as $field) {
@@ -162,10 +166,10 @@ class SchemaSaveTask extends SimpleBakeTask
     /**
      * Formats Schema columns from Model Object
      *
-     * @param array $values Options keys(type, null, default, key, length, extra).
+     * @param array|null $values Options keys(type, null, default, key, length, extra).
      * @return array Formatted values
      */
-    protected function _values($values)
+    protected function _values($values = null)
     {
         $vals = [];
         if (!is_array($values)) {
@@ -188,5 +192,24 @@ class SchemaSaveTask extends SimpleBakeTask
         }
 
         return $vals;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        return parent::buildOptionParser($parser)
+            ->addOption('connection', [
+                'default' => 'default',
+                'short' => 'c',
+            ])
+            ->addOption('path', [
+                'default' => 'config/schema.php',
+            ])
+            ->addOption('no-interaction', [
+                'boolean' => true,
+                'short' => 'n',
+            ]);
     }
 }
