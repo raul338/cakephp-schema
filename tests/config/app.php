@@ -10,6 +10,7 @@ return [
 
     'App' => [
         'namespace' => 'App',
+        'dir' => 'App',
     ],
 
     'Datasources' => [
