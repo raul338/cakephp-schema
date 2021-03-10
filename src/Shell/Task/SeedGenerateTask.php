@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell\Task;
 
 use Bake\Shell\Task\SimpleBakeTask;
-use Cake\Console\Shell;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
@@ -26,7 +27,7 @@ class SeedGenerateTask extends SimpleBakeTask
     ];
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function name(): string
     {
@@ -34,7 +35,7 @@ class SeedGenerateTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function fileName(string $name): string
     {
@@ -42,7 +43,7 @@ class SeedGenerateTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
@@ -50,7 +51,7 @@ class SeedGenerateTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getPath(): string
     {
@@ -59,6 +60,7 @@ class SeedGenerateTask extends SimpleBakeTask
 
     /**
      * main() method.
+     *
      * @param array $options Bake options
      * @return string
      */
@@ -94,9 +96,9 @@ class SeedGenerateTask extends SimpleBakeTask
 
         $connection = ConnectionManager::get($this->_config['connection']);
         $tables = $connection->getSchemaCollection()->listTables();
-
-        if (!($excludedTables = Configure::read('Schema.GenerateSeed.excludedTables'))) {
-            $excludedTables = [];
+        $excludedTables = Configure::read('Schema.GenerateSeed.excludedTables', []);
+        if (!is_array($excludedTables)) {
+            throw new \InvalidArgumentException('Schema.GenerateSeed.excludedTables is not an array');
         }
 
         foreach ($tables as $tableName) {
@@ -126,8 +128,8 @@ class SeedGenerateTask extends SimpleBakeTask
      */
     public function getRecordsFromTable($modelName, string $useTable)
     {
-        $recordCount = (isset($this->params['count']) ? $this->params['count'] : false);
-        $conditions = (isset($this->params['conditions']) ? $this->params['conditions'] : '1=1');
+        $recordCount = ($this->params['count'] ?? false);
+        $conditions = ($this->params['conditions'] ?? '1=1');
         $model = $this->findModel($modelName, $useTable);
 
         $records = $model->find('all')

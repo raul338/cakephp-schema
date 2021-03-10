@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell\Task;
 
 use Cake\Console\ConsoleOptionParser;
-use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Migrations\Shell\Task\SeedTask;
 use Riimu\Kit\PHPEncoder\PHPEncoder;
@@ -86,7 +87,7 @@ class MigrationSeedTask extends SeedTask
             $out .= implode(",\n", $values);
             $out .= "\n            ],\n";
         }
-        $out .= "        ]";
+        $out .= '        ]';
 
         return $out;
     }

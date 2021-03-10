@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\View\Helper;
 
 use Cake\View\Helper;
-use Cake\View\View;
 use Riimu\Kit\PHPEncoder\PHPEncoder;
 
 /**
@@ -10,7 +11,6 @@ use Riimu\Kit\PHPEncoder\PHPEncoder;
  */
 class SchemaHelper extends Helper
 {
-
     /**
      * Default configuration.
      *
@@ -47,7 +47,7 @@ class SchemaHelper extends Helper
                         'null.capitalize' => false,
                         'string.escape' => false,
                         'array.base' => 12,
-                        'float.integers' => "all",
+                        'float.integers' => 'all',
                         'float.precision' => false,
                     ]);
                 } else {

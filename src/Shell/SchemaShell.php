@@ -1,11 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell;
 
 use Cake\Cache\Cache;
 use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Console\Shell;
-use Schema\Task\SchemaSave;
 
 /**
  * Command-line code schema saving and loading.
@@ -32,7 +33,7 @@ class SchemaShell extends Shell
      *
      * @param \Cake\Console\ConsoleIo $io An io instance.
      */
-    public function __construct(ConsoleIo $io = null)
+    public function __construct(?ConsoleIo $io = null)
     {
         Cache::disable();
         parent::__construct($io);

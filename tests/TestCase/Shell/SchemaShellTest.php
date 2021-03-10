@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Test\TestCase\Shell;
 
 use Cake\TestSuite\TestCase;
@@ -9,7 +11,6 @@ use Schema\Shell\SchemaShell;
  */
 class SchemaShellTest extends TestCase
 {
-
     /**
      * setUp method
      *

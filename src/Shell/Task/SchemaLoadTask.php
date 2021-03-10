@@ -1,13 +1,13 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell\Task;
 
 use Cake\Console\Shell;
 use Cake\Database\Driver\Mysql;
-use Cake\Database\Driver\Sqlite;
 use Cake\Database\Schema\TableSchema as Schema;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\File;
 use Exception;
 use Schema\Table;
 
@@ -172,7 +172,6 @@ class SchemaLoadTask extends Shell
 
         $queries = [];
         foreach ($table->constraints() as $constraintName) {
-            /** @var array */
             $constraint = $table->getConstraint($constraintName);
             if ($constraint['type'] === Schema::CONSTRAINT_FOREIGN) {
                 // TODO: Move this into the driver

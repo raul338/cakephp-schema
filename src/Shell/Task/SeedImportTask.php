@@ -1,15 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell\Task;
 
-use Cake\Cache\Cache;
 use Cake\Console\Shell;
-use Cake\Core\Configure;
 use Cake\Database\Driver\Sqlserver;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\File;
-use Cake\ORM\TableRegistry;
-use Cake\Utility\Inflector;
 use Exception;
 use Schema\Table;
 
@@ -39,6 +36,7 @@ class SeedImportTask extends Shell
 
     /**
      * main() method.
+     *
      * @param array<mixed> $options Set connection name and path to the seed.php file.
      * @return bool|int Success or error code.
      */
@@ -231,6 +229,7 @@ class SeedImportTask extends Shell
 
     /**
      * Prepare table for data insertion.
+     *
      * @param \Cake\Database\Connection $db Connection
      * @param string $table Table
      * @return void
@@ -246,6 +245,7 @@ class SeedImportTask extends Shell
 
     /**
      * Clean after inserting.
+     *
      * @param \Cake\Database\Connection $db Connection
      * @param string $table Table
      * @return void

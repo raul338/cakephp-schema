@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema;
 
 use Cake\Database\Connection;
@@ -29,7 +31,7 @@ class Table extends TableSchema
      * Uses the connection to access the schema dialect
      * to generate platform specific SQL.
      *
-     * @param Connection $connection The connection to generate SQL for.
+     * @param \Cake\Database\Connection $connection The connection to generate SQL for.
      * @return array<string> List of SQL statements to create the table and the
      *    required indexes.
      */
@@ -43,7 +45,7 @@ class Table extends TableSchema
     /**
      * Returns list of ALTER TABLE statements to add foreign key constraints.
      *
-     * @param  Connection $connection The connection to generate SQL for.
+     * @param \Cake\Database\Connection $connection The connection to generate SQL for.
      * @return array<string> List of SQL statements to create the foreign keys.
      */
     public function foreignKeysSql(Connection $connection)
@@ -64,6 +66,7 @@ class Table extends TableSchema
     /**
      * Refresh the protected foreign keys variable.
      * All foreign keys are removed from the original constraints.
+     *
      * @param \Cake\Database\Connection $connection Connection
      * @return void
      */

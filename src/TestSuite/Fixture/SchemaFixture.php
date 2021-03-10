@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\TestSuite\Fixture;
 
 use Cake\TestSuite\Fixture\TestFixture;
@@ -18,11 +20,12 @@ class SchemaFixture extends TestFixture
 
     /**
      * Workaround to use cakephp-schema seed as fixtures
+     *
      * @return void
      */
     public function init(): void
     {
-        list($namespace, $className) = namespaceSplit(get_called_class());
+        [$namespace, $className] = namespaceSplit(static::class);
         $className = substr($className, 0, strlen('Fixture') * -1);
         $className = Inflector::underscore($className);
 

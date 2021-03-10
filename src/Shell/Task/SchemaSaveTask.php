@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace Schema\Shell\Task;
 
 use Bake\Shell\Task\SimpleBakeTask;
-use Cake\Console\Shell;
 use Cake\Database\Schema\TableSchema;
 use Cake\Datasource\ConnectionManager;
-use Cake\Filesystem\File;
 
 class SchemaSaveTask extends SimpleBakeTask
 {
@@ -21,7 +21,7 @@ class SchemaSaveTask extends SimpleBakeTask
     ];
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function name(): string
     {
@@ -29,7 +29,7 @@ class SchemaSaveTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function fileName($name): string
     {
@@ -37,7 +37,7 @@ class SchemaSaveTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function template(): string
     {
@@ -45,7 +45,7 @@ class SchemaSaveTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getPath(): string
     {
@@ -53,7 +53,8 @@ class SchemaSaveTask extends SimpleBakeTask
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
+     *
      * @return array<mixed>
      */
     public function templateData(): array
@@ -128,19 +129,16 @@ class SchemaSaveTask extends SimpleBakeTask
     {
         $cols = $indexes = $constraints = [];
         foreach ($table->columns() as $field) {
-            /** @var array */
             $fieldData = $table->getColumn($field);
             $properties = implode(', ', $this->_values($fieldData));
             $cols[] = "            '$field' => [$properties],";
         }
         foreach ($table->indexes() as $index) {
-            /** @var array */
             $fieldData = $table->getIndex($index);
             $properties = implode(', ', $this->_values($fieldData));
             $indexes[] = "                '$index' => [$properties],";
         }
         foreach ($table->constraints() as $index) {
-            /** @var array */
             $fieldData = $table->getConstraint($index);
             $properties = implode(', ', $this->_values($fieldData));
             $constraints[] = "                '$index' => [$properties],";
@@ -175,7 +173,7 @@ class SchemaSaveTask extends SimpleBakeTask
         }
         foreach ($values as $key => $val) {
             if (is_array($val)) {
-                $vals[] = "'{$key}' => [" . implode(", ", $this->_values($val)) . "]";
+                $vals[] = "'{$key}' => [" . implode(', ', $this->_values($val)) . ']';
             } else {
                 $val = var_export($val, true);
                 if ($val === 'NULL') {
