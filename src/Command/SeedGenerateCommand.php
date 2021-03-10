@@ -1,18 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Schema\Shell\Task;
+namespace Schema\Command;
 
-use Bake\Shell\Task\SimpleBakeTask;
+use Bake\Command\SimpleBakeCommand;
+use Cake\Console\Arguments;
+use Cake\Console\ConsoleIo;
+use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
-use Exception;
 
-class SeedGenerateTask extends SimpleBakeTask
+class SeedGenerateCommand extends SimpleBakeCommand
 {
     /**
      * Default configuration.
@@ -23,7 +25,8 @@ class SeedGenerateTask extends SimpleBakeTask
         'connection' => 'default',
         'seed' => 'config/seed.php',
         'path' => 'config/schema.php',
-        'no-interaction' => false,
+        'count' => false,
+        'conditions' => '1=1',
     ];
 
     /**
@@ -53,18 +56,15 @@ class SeedGenerateTask extends SimpleBakeTask
     /**
      * @inheritDoc
      */
-    public function getPath(): string
+    public function getPath(Arguments $arguments): string
     {
         return ROOT . DS;
     }
 
     /**
-     * main() method.
-     *
-     * @param array $options Bake options
-     * @return string
+     * @inheritDoc
      */
-    public function generate(array $options = [])
+    public function bake(string $name, Arguments $args, ConsoleIo $io): void
     {
         // Hook into the bake process to load our SchemaHelper
         EventManager::instance()->on('Bake.initialize', function (Event $event) {
@@ -73,24 +73,25 @@ class SeedGenerateTask extends SimpleBakeTask
             $view->loadHelper('Schema.Schema');
         });
 
-        $this->_config = array_merge($this->_config, $this->params, $options);
-        if ($this->_config['no-interaction']) {
-            $this->interactive = false;
+        $this->_config = [
+            'connection' => $args->getOption('connection'),
+            'seed' => $args->getOption('seed'),
+            'path' => $args->getOption('path'),
+            'count' => $args->getOption('count'),
+            'conditions' => $args->getOption('conditions'),
+        ];
+
+        if (!is_string($this->_config['path']) || !file_exists($this->_config['path'])) {
+            throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $this->_config['path']));
         }
 
-        if (!file_exists($this->_config['path'])) {
-            throw new Exception(sprintf('Schema file "%s" does not exist.', $this->_config['path']));
-        }
-
-        return parent::bake('seed');
+        parent::bake($name, $args, $io);
     }
 
     /**
-     * Called by bake for retrieving view vars.
-     *
-     * @return array
+     * @inheritDoc
      */
-    public function templateData(): array
+    public function templateData(Arguments $arguments): array
     {
         $seedData = [];
 
@@ -126,10 +127,10 @@ class SeedGenerateTask extends SimpleBakeTask
      * @param string $useTable Name of table to use.
      * @return \Cake\ORM\Query Array of records.
      */
-    public function getRecordsFromTable($modelName, string $useTable)
+    public function getRecordsFromTable(string $modelName, string $useTable)
     {
-        $recordCount = ($this->params['count'] ?? false);
-        $conditions = ($this->params['conditions'] ?? '1=1');
+        $recordCount = (filter_var($this->_config['count'], FILTER_VALIDATE_INT) ?? false);
+        $conditions = ($this->_config['conditions'] ?? '1=1');
         $model = $this->findModel($modelName, $useTable);
 
         $records = $model->find('all')
@@ -150,24 +151,53 @@ class SeedGenerateTask extends SimpleBakeTask
      * @param string $useTable Table to use
      * @return \Cake\ORM\Table
      */
-    public function findModel($modelName, $useTable)
+    public function findModel(string $modelName, string $useTable)
     {
         $options = ['connectionName' => $this->_config['connection']];
-        $model = TableRegistry::get($modelName, $options);
+        $model = TableRegistry::getTableLocator()->get($modelName, $options);
         // This means we have not found a Table implementation in the app namespace
         // Iterate through loaded plugins and try to find the table
-        if (get_class($model) == 'Cake\ORM\Table') {
+        if (get_class($model) === 'Cake\ORM\Table') {
             foreach (\Cake\Core\Plugin::loaded() as $plugin) {
-                $ret = TableRegistry::get("{$plugin}.{$modelName}", $options);
-                if (get_class($ret) != 'Cake\ORM\Table') {
+                $ret = TableRegistry::getTableLocator()->get("{$plugin}.{$modelName}", $options);
+                if (get_class($ret) !== 'Cake\ORM\Table') {
                     $model = $ret;
                 }
             }
         }
-        if (get_class($model) == 'Cake\ORM\Table') {
+        /*
+        if (get_class($model) === 'Cake\ORM\Table') {
             $this->out('Warning: Using Auto-Table for ' . $modelName);
         }
+        */
 
         return $model;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
+    {
+        return parent::buildOptionParser($parser)
+            ->addOption('connection', [
+                'default' => 'default',
+                'short' => 'c',
+            ])
+            ->addOption('path', [
+                'default' => 'config/schema.php',
+            ])
+            ->addOption('count', [
+                'help' => 'Limit recrods to be saved.',
+            ])
+            ->addOption('seed', [
+                'help' => 'Path to the seed.php file.',
+                'short' => 's',
+                'default' => 'config/seed.php',
+            ])
+            ->addOption('conditions', [
+                'help' => 'SQL Conditions for the records to be saved',
+                'default' => '1=1',
+            ]);
     }
 }
