@@ -1,0 +1,8 @@
+<?php
+return [
+{% for tableName,records in seedData %}
+    '{{ tableName }}' => [
+{{ records|raw }}
+    ],
+{% endfor %}
+];

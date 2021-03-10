@@ -12,6 +12,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Event\Event;
 use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
+use Riimu\Kit\PHPEncoder\PHPEncoder;
 use Schema\Helper;
 
 class SeedGenerateCommand extends SimpleBakeCommand
@@ -69,15 +70,8 @@ class SeedGenerateCommand extends SimpleBakeCommand
     /**
      * @inheritDoc
      */
-    public function bake(string $name, Arguments $args, ConsoleIo $io): void
+    public function execute(Arguments $args, ConsoleIo $io): ?int
     {
-        // Hook into the bake process to load our SchemaHelper
-        EventManager::instance()->on('Bake.initialize', function (Event $event) {
-            /** @var \Cake\View\View $view */
-            $view = $event->getSubject();
-            $view->loadHelper('Schema.Schema');
-        });
-
         $this->_config = [
             'connection' => $args->getOption('connection'),
             'seed' => $args->getOption('seed'),
@@ -92,7 +86,9 @@ class SeedGenerateCommand extends SimpleBakeCommand
 
         $this->helper = new Helper();
 
-        parent::bake($name, $args, $io);
+        parent::bake('seed', $args, $io);
+
+        return self::CODE_SUCCESS;
     }
 
     /**
@@ -118,7 +114,7 @@ class SeedGenerateCommand extends SimpleBakeCommand
             if (empty($data)) {
                 continue;
             }
-            $seedData[$tableName] = $data;
+            $seedData[$tableName] = $this->stringifyRecords($data);
         }
 
         return [
@@ -152,6 +148,55 @@ class SeedGenerateCommand extends SimpleBakeCommand
     }
 
     /**
+     * Generates the PHP array string for an array of records. Will use
+     * var_export() and PHPEncoder for more sophisticated types.
+     *
+     * @param array<mixed> $records Array of seed records
+     * @return string PHP Code
+     */
+    public function stringifyRecords(array $records)
+    {
+        $out = "[\n";
+        $out = '';
+        $encoder = new PHPEncoder();
+
+        foreach ($records as $record) {
+            $values = [];
+            foreach ($record as $field => $value) {
+                if ($value instanceof \DateTimeInterface) {
+                    $value = $value->format('Y-m-d H:i:s');
+                }
+                if (is_array($value)) {
+                    // FIXME: the encoder will forget precisions of floats
+                    $val = $encoder->encode($value, [
+                        'array.inline' => false,
+                        'array.omit' => false,
+                        'array.indent' => 4,
+                        'boolean.capitalize' => false,
+                        'null.capitalize' => false,
+                        'string.escape' => false,
+                        'array.base' => 12,
+                        'float.integers' => 'all',
+                        'float.precision' => false,
+                    ]);
+                } else {
+                    $val = var_export($value, true);
+                }
+
+                if ($val === 'NULL') {
+                    $val = 'null';
+                }
+                $values[] = "            '$field' => $val";
+            }
+            $out .= "        [\n";
+            $out .= implode(",\n", $values);
+            $out .= "\n        ],\n";
+        }
+        #$out .= "    ]";
+        return $out;
+    }
+
+    /**
      * @inheritDoc
      */
     public function buildOptionParser(ConsoleOptionParser $parser): ConsoleOptionParser
@@ -166,6 +211,8 @@ class SeedGenerateCommand extends SimpleBakeCommand
             ])
             ->addOption('count', [
                 'help' => 'Limit recrods to be saved.',
+                'default' => 10,
+                'short' => 'n',
             ])
             ->addOption('seed', [
                 'help' => 'Path to the seed.php file.',
