@@ -33,7 +33,7 @@ class SchemaLoadCommand extends Command
     public function execute(Arguments $args, ConsoleIo $io)
     {
         $this->_config = [
-            'connection' => $args->getOption('conneciton'),
+            'connection' => $args->getOption('connection'),
             'no-interaction' => $args->getOption('no-interaction'),
         ];
 
