@@ -18,6 +18,8 @@
  */
 #}
 <?php
+declare(strict_types=1);
+
 namespace {{ namespace }}\Test\Fixture;
 
 use Schema\TestSuite\Fixture\SchemaFixture;
@@ -34,6 +36,7 @@ class {{ name }}Fixture extends SchemaFixture
      * @var string
      */
     public $table = '{{ table|raw }}';
+
 {% endif %}
 {%- if import %}
     /**
@@ -42,5 +45,6 @@ class {{ name }}Fixture extends SchemaFixture
      * @var array
      */
     public $import = {{ import|raw }};
+
 {% endif %}
 }
