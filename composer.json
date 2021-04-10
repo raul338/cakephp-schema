@@ -1,6 +1,6 @@
 {
     "name": "raul338/cakephp-schema",
-    "description": "Schema saving and loading from file for CakePHP 3.6",
+    "description": "Schema saving and loading from file for CakePHP 4",
     "type": "cakephp-plugin",
     "keywords": ["cakephp", "orm", "database", "schema", "migrations"],
     "homepage": "https://github.com/raul338/cakephp-schema",
