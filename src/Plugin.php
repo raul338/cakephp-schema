@@ -19,6 +19,9 @@ use Schema\Command\SeedGenerateCommand;
 
 class Plugin extends BasePlugin
 {
+    /**
+     * @inheritDoc
+     */
     public function bootstrap(PluginApplicationInterface $app): void
     {
         parent::bootstrap($app);

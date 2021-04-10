@@ -11,7 +11,6 @@ declare(strict_types=1);
  * @param string $root path find root
  */
 
-
 require 'config/bootstrap.php';
 
 $directories = [
@@ -23,7 +22,7 @@ foreach ($directories as $dir) {
     if (!file_exists($dir) || !is_dir($dir)) {
         mkdir($dir, 0777);
     }
-    chmod($dir,  0777);
+    chmod($dir, 0777);
 }
 unset($dir);
 unset($directories);

@@ -9,8 +9,6 @@ use Cake\Console\ConsoleIo;
 use Cake\Console\ConsoleOptionParser;
 use Cake\Core\Configure;
 use Cake\Datasource\ConnectionManager;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
 use Cake\Utility\Inflector;
 use Riimu\Kit\PHPEncoder\PHPEncoder;
 use Schema\Helper;
