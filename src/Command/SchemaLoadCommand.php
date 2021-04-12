@@ -38,6 +38,9 @@ class SchemaLoadCommand extends Command
         ];
 
         $path = $args->getOption('path');
+        if ($path === null) {
+            $path = CONFIG . 'schema.php';
+        }
         if (!is_string($path)) {
             throw new \InvalidArgumentException('`path` option is not a string');
         }
@@ -278,7 +281,7 @@ class SchemaLoadCommand extends Command
                 'short' => 'c',
             ])
             ->addOption('path', [
-                'default' => 'config/schema.php',
+                'help' => 'defaults to CONFIG . "schema.php"',
             ])
             ->addOption('no-interaction', [
                 'boolean' => true,

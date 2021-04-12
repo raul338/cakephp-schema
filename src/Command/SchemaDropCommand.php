@@ -19,6 +19,9 @@ class SchemaDropCommand extends SchemaLoadCommand
         ];
 
         $path = $args->getOption('path');
+        if ($path === null) {
+            $path = CONFIG . 'schema.php';
+        }
         if (!is_string($path)) {
             throw new \InvalidArgumentException('`path` option is not a string');
         }
