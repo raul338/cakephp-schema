@@ -8,4 +8,5 @@ composer.lock
 /config/schema.php
 schema-dump-*.lock
 tests/config/schema.php
-
+/.phpunit.cache
+/public/coverage
