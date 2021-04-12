@@ -12,6 +12,7 @@ class Application extends BaseApplication
     {
         parent::bootstrap();
         $this->addPlugin('Migrations');
+        $this->addPlugin('Bake');
         $this->addPlugin('Schema');
     }
 

@@ -2,6 +2,7 @@
 
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
+use Cake\Database\Type;
 use Cake\Datasource\ConnectionManager;
 use Cake\Error\ConsoleErrorHandler;
 use Cake\Error\ErrorHandler;
@@ -21,3 +22,15 @@ if ($isCli) {
 } else {
     (new ErrorHandler(Configure::read('Error')))->register();
 }
+
+Type::build('time')
+    ->useLocaleParser()
+    ->useImmutable();
+Type::build('date')
+    ->useImmutable()
+    ->useLocaleParser();
+Type::build('datetime')
+    ->useImmutable()
+    ->useLocaleParser();
+
+

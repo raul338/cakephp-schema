@@ -1,16 +1,6 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Test suite bootstrap for Schema.
- *
- * This function is used to find the location of CakePHP whether CakePHP
- * has been installed as a dependency of the plugin, or the plugin is itself
- * installed as a dependency of an application.
- *
- * @param string $root path find root
- */
-
 require 'config/bootstrap.php';
 
 $directories = [

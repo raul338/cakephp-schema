@@ -10,7 +10,21 @@ return [
 
     'App' => [
         'namespace' => 'App',
-        'dir' => 'App',
+        'encoding' => env('APP_ENCODING', 'UTF-8'),
+        'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_US'),
+        'dir' => 'src',
+        'base' => false,
+        'webroot' => 'webroot',
+        'wwwRoot' => WWW_ROOT,
+        'fullBaseUrl' => false,
+        'imageBaseUrl' => 'img/',
+        'cssBaseUrl' => 'css/',
+        'jsBaseUrl' => 'js/',
+        'paths' => [
+            'plugins' => [ROOT . DS . 'plugins' . DS],
+            'templates' => [APP . 'Template' . DS],
+            'locales' => [APP . 'Locale' . DS],
+        ],
     ],
 
     'Datasources' => [
@@ -22,6 +36,32 @@ return [
             'password' => env('DB_PASS', 'test'),
             'database' => env('DB_NAME', 'test'),
             'url' => env('DATABASE_URL'),
+        ],
+    ],
+
+    'Cache' => [
+        'default' => [
+            'className' => 'File',
+            'path' => CACHE,
+            'url' => env('CACHE_DEFAULT_URL', null),
+        ],
+
+        '_cake_core_' => [
+            'className' => 'File',
+            'prefix' => 'myapp_cake_core_',
+            'path' => CACHE . 'persistent/',
+            'serialize' => true,
+            'duration' => '+2 minutes',
+            'url' => env('CACHE_CAKECORE_URL', null),
+        ],
+
+        '_cake_model_' => [
+            'className' => 'File',
+            'prefix' => 'myapp_cake_model_',
+            'path' => CACHE . 'models/',
+            'serialize' => true,
+            'duration' => '+2 minutes',
+            'url' => env('CACHE_CAKEMODEL_URL', null),
         ],
     ],
 
