@@ -29,7 +29,21 @@ class SchemaCommandsTest extends TestCase
         }
         $migration = new Migrations();
         $migration->migrate(['connection' => 'test']);
-        $this->exec('schema save -f -c test');
+        $this->exec('schema save -c test');
+        $this->assertExitSuccess();
+        $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
+        $this->assertFileEquals(TESTS . 'files/schema.php', CONFIG . 'schema.php');
+    }
+
+    /**
+     * @depends testSchemaSave
+     */
+    public function testSchemaSaveOverwriteFile(): void
+    {
+        $this->testSchemaSave();
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
+        $this->exec('schema save -c test', ['y']);
         $this->assertExitSuccess();
         $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
     }
@@ -40,16 +54,20 @@ class SchemaCommandsTest extends TestCase
     public function testSchemaDrop(): void
     {
         $this->testSchemaSave();
-        $this->exec('schema drop -n -c test');
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
+        $this->exec('schema drop -c test', ['y']);
         $this->assertExitSuccess();
     }
 
     /**
-     * @depends testSchemaSave
+     * @depends testSchemaDrop
      */
     public function testSchemaLoad(): void
     {
-        $this->testSchemaSave();
+        $this->testSchemaDrop();
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
         $this->exec('schema load -n -c test');
         $this->assertExitSuccess();
     }
