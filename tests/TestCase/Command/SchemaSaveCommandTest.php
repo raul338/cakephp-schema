@@ -26,8 +26,7 @@ class SchemaSaveCommandTest extends TestCase
     {
         $migration = new Migrations();
         $migration->migrate(['connection' => 'test']);
-        $this->exec('schema save -n -c test');
-        $this->assertOutputContains('a');
+        $this->exec('schema save -f -c test');
         $this->assertExitSuccess();
         $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
     }

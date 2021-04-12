@@ -6,3 +6,6 @@ composer.lock
 /tmp
 /logs
 /config/schema.php
+schema-dump-*.lock
+tests/config/schema.php
+
