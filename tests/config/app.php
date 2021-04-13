@@ -35,7 +35,7 @@ return [
             'username' => env('DB_USER', 'test'),
             'password' => env('DB_PASS', 'test'),
             'database' => env('DB_NAME', 'test'),
-            'url' => env('DATABASE_URL'),
+            'url' => env('DB_URL'),
         ],
     ],
 
