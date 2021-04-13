@@ -8,7 +8,7 @@ use Schema\TestSuite\Fixture\SchemaFixture;
 class ProfilesFixture extends SchemaFixture
 {
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public $schemaFile = TESTS . 'files' . DS . 'schema.php';
 }
