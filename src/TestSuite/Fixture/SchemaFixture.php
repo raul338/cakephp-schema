@@ -36,6 +36,9 @@ class SchemaFixture extends TestFixture
         $className = substr($className, 0, strlen('Fixture') * -1);
         $className = Inflector::underscore($className);
 
+        if (!file_exists($this->schemaFile)) {
+            throw new \RuntimeException(sprintf('Schema file `%s` does not exist..', $this->schemaFile));
+        }
         $ret = require $this->schemaFile;
         if (!is_array($ret)) {
             throw new \RuntimeException(sprintf('Schema file `%s` did not return an array.', $this->schemaFile));
