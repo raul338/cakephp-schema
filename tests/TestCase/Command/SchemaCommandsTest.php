@@ -24,6 +24,14 @@ class SchemaCommandsTest extends TestCase
 
     public $autoFixtures = false;
 
+    /**
+     * @var string[]
+     */
+    public $fixtures = [
+        'app.Profiles',
+        'app.Users',
+    ];
+
     public function setUp(): void
     {
         parent::setUp();
@@ -101,5 +109,20 @@ class SchemaCommandsTest extends TestCase
 
         $table = TableRegistry::getTableLocator()->get('Profiles');
         $this->assertIsArray($table->find()->toArray());
+    }
+
+    /**
+     * @depends testSchemaSave
+     */
+    public function testFixturesWorking(): void
+    {
+        $this->testSchemaSave();
+        $this->dropTables();
+        $this->loadFixtures('Profiles', 'Users');
+        $profiles = TableRegistry::getTableLocator()->get('Profiles');
+        $query = $profiles->find();
+        $this->assertSame($query->count(), 1, 'Profile data not loaded from seed');
+        $profile = $query->first();
+        $this->assertSame($profile->get('name'), 'admin');
     }
 }
