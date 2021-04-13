@@ -19,6 +19,13 @@ class SchemaFixture extends TestFixture
     public $seedFile = ROOT . DS . 'config' . DS . 'seed.php';
 
     /**
+     * Schema File to load fixture schema
+     *
+     * @var string
+     */
+    public $schemaFile = ROOT . DS . 'config' . DS . 'schema.php';
+
+    /**
      * Workaround to use cakephp-schema seed as fixtures
      *
      * @return void
@@ -29,16 +36,23 @@ class SchemaFixture extends TestFixture
         $className = substr($className, 0, strlen('Fixture') * -1);
         $className = Inflector::underscore($className);
 
-        $ret = require ROOT . DS . 'config' . DS . 'schema.php';
+        $ret = require $this->schemaFile;
+        if (!is_array($ret)) {
+            throw new \RuntimeException(sprintf('Schema file `%s` did not return an array.', $this->schemaFile));
+        }
         if (array_key_exists($className, $ret['tables'])) {
             $this->fields = $ret['tables'][$className];
         }
         if (file_exists($this->seedFile)) {
             $ret = require $this->seedFile;
+            if (!is_array($ret)) {
+                throw new \RuntimeException(sprintf('Seed file `%s` did not return an array.', $this->seedFile));
+            }
             if (array_key_exists($className, $ret)) {
                 $this->records = $ret[$className];
             }
         }
+
         parent::init();
     }
 }
