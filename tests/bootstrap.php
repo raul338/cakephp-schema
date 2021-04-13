@@ -10,7 +10,7 @@ $directories = [
 ];
 foreach ($directories as $dir) {
     if (!file_exists($dir) || !is_dir($dir)) {
-        mkdir($dir, 0777);
+        mkdir($dir, 0777, true);
     }
     chmod($dir, 0777);
 }
