@@ -1,6 +1,8 @@
-# Schema plugin for CakePHP 3.6
+# Schema plugin for CakePHP 4.x
 
-Save the schema into one file and then restore the database from the schema file. The schema is automatically saved when executing `cake migrations migrate`.
+for usage in CakePHP 3.x see the [2.x branch](https://github.com/raul338/cakephp-schema/tree/2.x)
+
+Save the schema into one file and use as an automatic schema for Fixtures. The schema is automatically saved when executing `cake migrations migrate`.
 
 ## Supported datasources
 
@@ -16,45 +18,38 @@ You can install this plugin into your CakePHP application using [composer](http:
 The recommended way to install composer packages is:
 
 ```
-composer require scherersoftware/cakephp-schema
+composer require raul338/cakephp-schema
 ```
 
-Update your `config/bootstrap.php``:
+Update your `Application` class:
 
 ```PHP
-Plugin::load('Schema', ['bootstrap' => true]);
+public function bootstrapCli()
+{
+    // ....
+    $this->addOptionalPlugin('Schema');
+}
 ```
 
 ## Usage
 
-The plugin saves the schema of the `default` connection to the `config/schema.php` file. The structure is similiar to the fixtures fields.
+The plugin saves the schema of the `default` connection to the `config/schema.php` file. The structure is similar to the fixtures fields.
 
 ```
 cake schema save
 ```
 
-To load the schema back execute
+To load the schema back, useful for debug with test data. Run:
 
 ```
 cake schema load
 ```
 
-All existing tables in the database are dropped before loading. You will be asked
-
-```
-Loading the schema from the file Database is not empty. 37 tables will be deleted.
-Do you want to continue? (y/n)
-```
-
-To disable the question (and answer with yes) run 
-
-```
-cake schema load --no-interaction
-```
-
 ### Seed
 
-The Schema plugin allows you to seed data from the `config/seed.php` file. The `seed.php` file should return array of tables and rows:
+The Schema plugin allows you to seed data from the `config/seed.php` file.
+This also is useful to save unrelated tables (like tables from acl plugin, or `sphinxlog` table)
+The `seed.php` file should return array of tables and rows:
 
 ```
 <?php
@@ -113,21 +108,34 @@ Seed commands will take the following options:
     cake schema seed --truncate
     cake schema generateseed --seed config/my_seed.php
 
-# Seeding for Migrations Plugin / phinx
+# Fixture generation
 
-This plugin provides a bake task extending the `seed` bake task provided by the `cakephp/migrations` plugin, but with automated inclusion of seed data from the database.
+This plugins allows to use generated schema and seeds as fixture model and data, by using a `SchemaFixture`. You can extend your fixtures just like the book indicates.
 
 Example usage:
 
-    bin/cake bake migration_seed Users --records
+    bin/cake bake fixture --theme Schema Users
 
-This will write a new file into `src/config/Seeds/UsersSeed.php` including all records currently present in the DB's users table.
+```php
+<?php
+declare(strict_types=1);
+
+namespace App\Test\Fixture;
+
+use Schema\TestSuite\Fixture\SchemaFixture;
+
+class UsersFixture extends SchemaFixture
+{
+    // This class reads schema from users key in config/schema.php
+    // and reads records from users key in config/seed.php if exists
+}
+```
 
 ## TODO
  
 - [x] Auto-creation of the schema.php file after `cake migrations migrate`
 - [x] Data seeding
-- [ ] Tests
+- [x] Tests
 - [ ] More options and configuration
 - [ ] Refactoring and cleaning the code
 
