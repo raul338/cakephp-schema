@@ -45,7 +45,7 @@ class SchemaFixtureTest extends TestCase
         $this->loadFixtures('Profiles', 'Users');
         $profiles = TableRegistry::getTableLocator()->get('Profiles');
         $query = $profiles->find();
-        $this->assertSame($query->count(), 1, 'Profile not loaded from schema');
+        $this->assertSame($query->count(), 1, 'Profile data not loaded from seed');
         $profile = $query->first();
         $this->assertSame($profile->get('name'), 'admin');
     }

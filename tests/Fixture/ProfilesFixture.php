@@ -7,4 +7,5 @@ use Schema\TestSuite\Fixture\SchemaFixture;
 
 class ProfilesFixture extends SchemaFixture
 {
+    public $seedFile = TESTS . 'files' . DS . 'seed.php';
 }
