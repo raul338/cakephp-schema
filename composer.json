@@ -53,7 +53,5 @@
         "cs-check": "phpcs --colors -p",
         "cs-fix": "phpcbf --colors -p",
         "phpstan": "phpstan analyze -c phpstan.neon --ansi --memory-limit=-1"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
