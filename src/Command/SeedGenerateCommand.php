@@ -94,7 +94,10 @@ class SeedGenerateCommand extends SimpleBakeCommand
     }
 
     /**
-     * @inheritDoc
+     * Get template data.
+     *
+     * @param \Cake\Console\Arguments $arguments The arguments for the command
+     * @return array<string, mixed>
      */
     public function templateData(Arguments $arguments): array
     {

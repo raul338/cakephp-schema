@@ -37,14 +37,20 @@ class SchemaFixture extends TestFixture
         $className = Inflector::tableize($className);
 
         if (!file_exists($this->schemaFile)) {
-            throw new \RuntimeException(sprintf('Schema file `%s` does not exist. Please run bin/cake schema generateseed', $this->schemaFile));
+            throw new \RuntimeException(sprintf(
+                'Schema file `%s` does not exist. Please run bin/cake schema generateseed',
+                $this->schemaFile
+            ));
         }
         $ret = require $this->schemaFile;
         if (!is_array($ret)) {
             throw new \RuntimeException(sprintf('Schema file `%s` did not return an array.', $this->schemaFile));
         }
         if (!array_key_exists($className, $ret['tables'])) {
-            throw new \RuntimeException(sprintf('Unable to retrieve fixture: Table `%s` does not exist in saved schema.', $className));
+            throw new \RuntimeException(sprintf(
+                'Unable to retrieve fixture: Table `%s` does not exist in saved schema.',
+                $className
+            ));
         }
         $this->fields = $ret['tables'][$className];
         if (file_exists($this->seedFile)) {
