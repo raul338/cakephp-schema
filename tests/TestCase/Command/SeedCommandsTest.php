@@ -19,6 +19,8 @@ class SeedCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
+    public $autoFixtures = false;
+
     /**
      * @var string
      */

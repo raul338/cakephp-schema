@@ -20,6 +20,8 @@ class SchemaCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
 
+    public $autoFixtures = false;
+
     protected function setUp(): void
     {
         parent::setUp();
