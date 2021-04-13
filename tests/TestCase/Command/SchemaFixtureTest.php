@@ -11,6 +11,7 @@ use Migrations\Migrations;
 class SchemaFixtureTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+    use UtilitiesTrait;
 
     /**
      * @var bool
@@ -27,12 +28,15 @@ class SchemaFixtureTest extends TestCase
 
     protected function buildSchema(): void
     {
+        $this->dropTables();
         if (file_exists(CONFIG . 'schema.php')) {
             unlink(CONFIG . 'schema.php');
         }
         $migration = new Migrations();
         $migration->migrate(['connection' => 'test']);
+        $this->useCommandRunner();
         $this->exec('schema save -c test');
+        $this->dropTables();
     }
 
     public function testFixturesWorking(): void

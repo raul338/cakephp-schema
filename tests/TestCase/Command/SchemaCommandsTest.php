@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace Schema\Test\TestCase\Command;
 
-use Cake\Datasource\ConnectionManager;
+use Cake\Database\Exception\DatabaseException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\Utility\Hash;
 use Migrations\Migrations;
 
 /**
@@ -19,6 +20,7 @@ use Migrations\Migrations;
 class SchemaCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+    use UtilitiesTrait;
 
     public $autoFixtures = false;
 
@@ -27,14 +29,6 @@ class SchemaCommandsTest extends TestCase
         parent::setUp();
         $this->useCommandRunner();
         $this->dropTables();
-    }
-
-    protected function dropTables(): void
-    {
-        $conn = ConnectionManager::get('default');
-        $conn->execute('DROP TABLE IF EXISTS `users`');
-        $conn->execute('DROP TABLE IF EXISTS `profiles`');
-        $conn->execute('DROP TABLE IF EXISTS `phinxlog`');
     }
 
     public function testSchemaSave(): void
@@ -55,6 +49,8 @@ class SchemaCommandsTest extends TestCase
             unlink(CONFIG . 'schema.php');
         }
         touch(CONFIG . 'schema.php');
+        $migration = new Migrations();
+        $migration->migrate(['connection' => 'test']);
         $this->exec('schema save -c test', ['y']);
         $this->assertExitSuccess();
         $this->assertValidSchemaFile();
@@ -64,8 +60,11 @@ class SchemaCommandsTest extends TestCase
     {
         $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
         $content = require CONFIG . 'schema.php';
-        $this->assertArrayHasKey('profiles', $content);
-        $this->assertArrayHasKey('users', $content);
+        $this->assertIsArray($content);
+        $tables = Hash::get($content, 'tables');
+        $this->assertIsArray($tables);
+        $this->assertArrayHasKey('profiles', $tables);
+        $this->assertArrayHasKey('users', $tables);
     }
 
     protected function callDropCommand(): void
@@ -84,7 +83,7 @@ class SchemaCommandsTest extends TestCase
     {
         $this->callDropCommand();
 
-        $this->expectException(\PDOException::class);
+        $this->expectException(DatabaseException::class);
         $table = TableRegistry::getTableLocator()->get('Profiles');
         $table->find()->toArray();
     }

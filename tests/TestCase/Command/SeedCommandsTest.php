@@ -18,6 +18,7 @@ use Migrations\Migrations;
 class SeedCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+    use UtilitiesTrait;
 
     public $autoFixtures = false;
 
@@ -36,6 +37,7 @@ class SeedCommandsTest extends TestCase
         parent::setUp();
         $this->useCommandRunner();
 
+        $this->dropTables();
         if (file_exists(CONFIG . 'schema.php')) {
             unlink(CONFIG . 'schema.php');
         }
@@ -51,6 +53,9 @@ class SeedCommandsTest extends TestCase
         $profiles = TableRegistry::getTableLocator()->get('profiles');
         $profile = $profiles->newEntity(['name' => 'admin']);
         $profiles->saveOrFail($profile);
+        if (file_exists(CONFIG . 'seed.php')) {
+            unlink(CONFIG . 'seed.php');
+        }
 
         $this->exec('schema generateseed -c test --path ' . $this->schemaFile, ['y']);
         $this->assertOutputContains('seed');
