@@ -10,3 +10,5 @@ schema-dump-*.lock
 tests/config/schema.php
 /.phpunit.cache
 /public/coverage
+/tests/config/seed.php
+/tests/config/schema.php

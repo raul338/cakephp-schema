@@ -38,7 +38,7 @@ class SeedGenerateCommand extends SimpleBakeCommand
      */
     public function name(): string
     {
-        return 'seed';
+        return 'generateseed';
     }
 
     /**
@@ -70,21 +70,25 @@ class SeedGenerateCommand extends SimpleBakeCommand
      */
     public function execute(Arguments $args, ConsoleIo $io): ?int
     {
+        $path = $args->getOption('path');
+        if ($path === null) {
+            $path = CONFIG . 'schema.php';
+        }
         $this->_config = [
             'connection' => $args->getOption('connection'),
             'seed' => $args->getOption('seed'),
-            'path' => $args->getOption('path'),
+            'path' => $path,
             'count' => $args->getOption('count'),
             'conditions' => $args->getOption('conditions'),
         ];
 
-        if (!is_string($this->_config['path']) || !file_exists($this->_config['path'])) {
-            throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $this->_config['path']));
+        if (!is_string($path) || !file_exists($path)) {
+            throw new \InvalidArgumentException(sprintf('Schema file "%s" does not exist.', $path));
         }
 
         $this->helper = new Helper();
 
-        parent::bake('seed', $args, $io);
+        parent::bake('generateseed', $args, $io);
 
         return self::CODE_SUCCESS;
     }
@@ -205,7 +209,7 @@ class SeedGenerateCommand extends SimpleBakeCommand
                 'short' => 'c',
             ])
             ->addOption('path', [
-                'default' => 'config/schema.php',
+                'help' => 'Schema file. Defaults to CONFIG . DS . schema.php',
             ])
             ->addOption('count', [
                 'help' => 'Limit recrods to be saved.',

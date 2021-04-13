@@ -10,9 +10,11 @@ use Cake\TestSuite\TestCase;
 use Migrations\Migrations;
 
 /**
- * Class SchemaSaveCommandTest
+ * Class SchemaCommandsTest
  *
  * @uses \Schema\Command\SchemaSaveCommand
+ * @uses \Schema\Command\SchemaLoadCommand
+ * @uses \Schema\Command\SchemaDropCommand
  */
 class SchemaCommandsTest extends TestCase
 {
