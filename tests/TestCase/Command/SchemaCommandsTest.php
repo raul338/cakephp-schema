@@ -112,6 +112,7 @@ class SchemaCommandsTest extends TestCase
         $this->dropTables();
         if ($this->fixtureManager === null) {
             $this->markAsRisky();
+
             return;
         }
         $this->fixtures = [
