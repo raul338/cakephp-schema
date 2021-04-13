@@ -34,7 +34,7 @@ class SchemaFixture extends TestFixture
     {
         [$namespace, $className] = namespaceSplit(static::class);
         $className = substr($className, 0, strlen('Fixture') * -1);
-        $className = Inflector::underscore($className);
+        $className = Inflector::tableize($className);
 
         if (!file_exists($this->schemaFile)) {
             throw new \RuntimeException(sprintf('Schema file `%s` does not exist. Please run bin/cake schema generateseed', $this->schemaFile));
