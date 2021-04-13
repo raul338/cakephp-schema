@@ -17,12 +17,14 @@ jobs:
         php-version: [ '7.2', '7.4', '8.0' ]
         db-type: [ sqlite, mysql, pgsql ]
         prefer-lowest: [ '' ]
+        composer: ['v2']
         include:
           - php-version: '7.2'
             db-type: 'mariadb'
           - php-version: '7.2'
             db-type: 'mysql'
             prefer-lowest: 'prefer-lowest'
+            composer: 'v1'
     steps:
       - name: Setup MySQL latest
         if: matrix.db-type == 'mysql' && matrix.php-version != '7.2'
@@ -53,7 +55,7 @@ jobs:
           php-version: ${{ matrix.php-version }}
           extensions: mbstring, intl, pdo_${{ matrix.db-type }}
           coverage: pcov
-          tools: composer
+          tools: composer:${{ matrix.composer }}
 
       - name: Get Composer Cache Directory
         id: composer-cache
