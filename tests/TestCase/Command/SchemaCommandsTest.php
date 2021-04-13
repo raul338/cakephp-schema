@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Schema\Test\TestCase\Command;
 
+use Cake\Database\Exception;
 use Cake\Database\Exception\DatabaseException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
@@ -83,7 +84,11 @@ class SchemaCommandsTest extends TestCase
     {
         $this->callDropCommand();
 
-        $this->expectException(DatabaseException::class);
+        $this->expectException(
+            class_exists(DatabaseException::class)
+                ? DatabaseException::class
+                : Exception::class
+        );
         $table = TableRegistry::getTableLocator()->get('Profiles');
         $table->find()->toArray();
     }
