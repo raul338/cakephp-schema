@@ -74,7 +74,7 @@ jobs:
       - name: Install dependencies
         run: |
           if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
-            composer update --prefer-lowest --prefer-stable
+            composer update --prefer-lowest --prefer-stable --no-progress
           else
             composer install
           fi
