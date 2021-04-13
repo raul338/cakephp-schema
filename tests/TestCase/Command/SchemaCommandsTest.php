@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace Schema\Test\TestCase\Command;
 
+use Cake\Datasource\ConnectionManager;
+use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
+use Cake\TestSuite\TestCase;
 use Migrations\Migrations;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Class SchemaSaveCommandTest
@@ -20,6 +22,15 @@ class SchemaCommandsTest extends TestCase
     {
         parent::setUp();
         $this->useCommandRunner();
+        $this->dropTables();
+    }
+
+    protected function dropTables(): void
+    {
+        $conn = ConnectionManager::get('default');
+        $conn->execute('DROP TABLE IF EXISTS `users`');
+        $conn->execute('DROP TABLE IF EXISTS `profiles`');
+        $conn->execute('DROP TABLE IF EXISTS `phinxlog`');
     }
 
     public function testSchemaSave(): void
@@ -68,7 +79,34 @@ class SchemaCommandsTest extends TestCase
         $this->testSchemaDrop();
         $this->cleanupConsoleTrait();
         $this->useCommandRunner();
-        $this->exec('schema load -n -c test');
+        $this->exec('schema load -c test', ['y']);
         $this->assertExitSuccess();
+    }
+
+    /**
+     * @depends testSchemaSave
+     * @depends testSchemaDrop
+     */
+    public function testLoadFixturesFromSchemaFile(): void
+    {
+        // build schema.php
+        $this->testSchemaSave();
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
+
+        // clean db
+        $this->testSchemaDrop();
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
+
+        // action
+        $this->cleanupConsoleTrait();
+        $this->useCommandRunner();
+        $this->exec('schema load -c test --path ' . TESTS . 'files/schema.php', ['y']);
+        $this->assertExitSuccess();
+
+        // Asserts
+        $profiles = TableRegistry::getTableLocator()->get('Profiles')->find('all')->toArray();
+        $this->assertIsArray($profiles);
     }
 }
