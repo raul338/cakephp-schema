@@ -7,6 +7,7 @@ use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Hash;
+use Migrations\Migrations;
 
 /**
  * Class SeedCommandsTest
@@ -21,7 +22,7 @@ class SeedCommandsTest extends TestCase
     /**
      * @var string
      */
-    public $schemaFile = TESTS . 'files' . DS . 'schema.php';
+    public $schemaFile = CONFIG . DS . 'schema.php';
 
     /**
      * @var string
@@ -36,7 +37,9 @@ class SeedCommandsTest extends TestCase
         if (file_exists(CONFIG . 'schema.php')) {
             unlink(CONFIG . 'schema.php');
         }
-        $this->exec('schema load -n -c test --path ' . $this->schemaFile);
+        $migration = new Migrations();
+        $migration->migrate(['connection' => 'test']);
+        $this->exec('schema save -c test');
         $this->cleanupConsoleTrait();
         $this->useCommandRunner();
     }

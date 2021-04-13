@@ -7,8 +7,4 @@ use Schema\TestSuite\Fixture\SchemaFixture;
 
 class UsersFixture extends SchemaFixture
 {
-    /**
-     * @inheritDoc
-     */
-    public $schemaFile = TESTS . 'files' . DS . 'schema.php';
 }
