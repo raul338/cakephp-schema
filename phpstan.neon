@@ -1,11 +1,11 @@
 parameters:
-    bootstrapFiles:
-        - tests/bootstrap.php
-    checkMissingIterableValueType: false
-    earlyTerminatingMethodCalls:
-        Cake\Shell\Shell:
-            - abort
-    level: max
-    paths:
-        - ./src
-#        - ./tests
+	bootstrapFiles:
+		- tests/bootstrap.php
+	checkMissingIterableValueType: false
+	earlyTerminatingMethodCalls:
+		Cake\Shell\Shell:
+			- abort
+	level: max
+	paths:
+		- ./src
+		# - ./tests
