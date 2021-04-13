@@ -24,7 +24,7 @@ class SchemaCommandsTest extends TestCase
 
     public $autoFixtures = false;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         $this->useCommandRunner();

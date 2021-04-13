@@ -32,7 +32,7 @@ class SeedCommandsTest extends TestCase
      */
     public $seedFile = TESTS . 'files' . DS . 'seed.php';
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         $this->useCommandRunner();
