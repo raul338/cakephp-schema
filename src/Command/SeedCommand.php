@@ -218,6 +218,7 @@ class SeedCommand extends Command
             $types[$field] = $schema->getColumnType($field . ''); // trick phpstan
         }
         $default = array_fill_keys($fields, null);
+        $default = array_merge($default, $schema->defaultValues()); // Overwrite nulls with real default values
         foreach ($records as $record) {
             $values[] = array_merge($default, $record);
         }
