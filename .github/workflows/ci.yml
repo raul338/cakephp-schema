@@ -18,7 +18,8 @@ jobs:
         with:
           php-version: '7.4'
           extensions: mbstring, intl
-          coverage: xdebug
+          coverage: pcov
+          tools: composer
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -37,10 +38,10 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Run test
-        run: env XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text --verbose
+        run: vendor/bin/phpunit --coverage-text --verbose
   cs-stan:
     name: Coding Standard & Static Analysis
     runs-on: ubuntu-latest
@@ -54,25 +55,26 @@ jobs:
           php-version: '7.4'
           extensions: mbstring, intl
           coverage: none
+          tools: composer
 
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
           echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-          - name: Get date part for cache key
-            id: key-date
-            run: echo "::set-output name=date::$(date +'%Y-%m')"
+      - name: Get date part for cache key
+        id: key-date
+        run: echo "::set-output name=date::$(date +'%Y-%m')"
 
-          - uses: actions/cache@v1
-            with:
-              path: ${{ steps.composer-cache.outputs.dir }}
-              key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}
-              restore-keys: |
-                ${{ runner.os }}-composer-
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
-          - name: Install dependencies
-            run: composer install --prefer-dist --no-progress --no-suggest
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
 
       - name: Run phpcs
         run: vendor/bin/phpcs
