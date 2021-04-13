@@ -5,6 +5,7 @@ namespace Schema\Test\TestCase\Command;
 
 use Cake\Database\Exception;
 use Cake\Database\Exception\DatabaseException;
+use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
@@ -130,6 +131,8 @@ class SchemaCommandsTest extends TestCase
         $query = $profiles->find();
         $this->assertSame($query->count(), 1, 'Profile data not loaded from seed');
         $profile = $query->first();
+        $this->assertNotNull($profile, 'profile should not be null');
+        $this->assertInstanceOf(Entity::class, $profile);
         $this->assertSame($profile->get('name'), 'admin');
     }
 }

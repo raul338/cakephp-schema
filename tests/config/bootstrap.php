@@ -13,8 +13,8 @@ require CORE_PATH . 'config' . DS . 'bootstrap.php';
 
 Configure::config('default', new PhpConfig());
 Configure::load('app', 'default', false);
-ConnectionManager::setConfig(Configure::consume('Datasources'));
-Log::setConfig(Configure::consume('Log'));
+ConnectionManager::setConfig((array)Configure::consume('Datasources'));
+Log::setConfig((array)Configure::consume('Log'));
 
 $isCli = PHP_SAPI === 'cli';
 if ($isCli) {
@@ -22,13 +22,3 @@ if ($isCli) {
 } else {
     (new ErrorHandler(Configure::read('Error')))->register();
 }
-
-Type::build('time')
-    ->useLocaleParser()
-    ->useImmutable();
-Type::build('date')
-    ->useImmutable()
-    ->useLocaleParser();
-Type::build('datetime')
-    ->useImmutable()
-    ->useLocaleParser();
