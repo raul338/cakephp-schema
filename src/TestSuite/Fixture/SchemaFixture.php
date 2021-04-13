@@ -16,14 +16,14 @@ class SchemaFixture extends TestFixture
      *
      * @var string
      */
-    public $seedFile = CONFIG . DS . 'seed.php';
+    public $seedFile = CONFIG . 'seed.php';
 
     /**
      * Schema File to load fixture schema
      *
      * @var string
      */
-    public $schemaFile = CONFIG . DS . 'schema.php';
+    public $schemaFile = CONFIG . 'schema.php';
 
     /**
      * Workaround to use cakephp-schema seed as fixtures
