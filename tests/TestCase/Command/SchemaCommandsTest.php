@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Schema\Test\TestCase\Command;
 
-use Cake\Datasource\ConnectionManager;
+use Cake\Database\Exception;
+use Cake\Database\Exception\DatabaseException;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
+use Cake\Utility\Hash;
 use Migrations\Migrations;
 
 /**
@@ -19,20 +21,15 @@ use Migrations\Migrations;
 class SchemaCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+    use UtilitiesTrait;
 
-    protected function setUp(): void
+    public $autoFixtures = false;
+
+    public function setUp(): void
     {
         parent::setUp();
         $this->useCommandRunner();
         $this->dropTables();
-    }
-
-    protected function dropTables(): void
-    {
-        $conn = ConnectionManager::get('default');
-        $conn->execute('DROP TABLE IF EXISTS `users`');
-        $conn->execute('DROP TABLE IF EXISTS `profiles`');
-        $conn->execute('DROP TABLE IF EXISTS `phinxlog`');
     }
 
     public function testSchemaSave(): void
@@ -44,27 +41,34 @@ class SchemaCommandsTest extends TestCase
         $migration->migrate(['connection' => 'test']);
         $this->exec('schema save -c test');
         $this->assertExitSuccess();
-        $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
-        $this->assertFileEquals(TESTS . 'files/schema.php', CONFIG . 'schema.php');
+        $this->assertValidSchemaFile();
     }
 
-    /**
-     * @depends testSchemaSave
-     */
     public function testSchemaSaveOverwriteFile(): void
     {
-        $this->testSchemaSave();
-        $this->cleanupConsoleTrait();
-        $this->useCommandRunner();
+        if (file_exists(CONFIG . 'schema.php')) {
+            unlink(CONFIG . 'schema.php');
+        }
+        touch(CONFIG . 'schema.php');
+        $migration = new Migrations();
+        $migration->migrate(['connection' => 'test']);
         $this->exec('schema save -c test', ['y']);
         $this->assertExitSuccess();
-        $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
+        $this->assertValidSchemaFile();
     }
 
-    /**
-     * @depends testSchemaSave
-     */
-    public function testSchemaDrop(): void
+    protected function assertValidSchemaFile(): void
+    {
+        $this->assertFileExists(CONFIG . 'schema.php', 'Schema file not generated');
+        $content = require CONFIG . 'schema.php';
+        $this->assertIsArray($content);
+        $tables = Hash::get($content, 'tables');
+        $this->assertIsArray($tables);
+        $this->assertArrayHasKey('profiles', $tables);
+        $this->assertArrayHasKey('users', $tables);
+    }
+
+    protected function callDropCommand(): void
     {
         $this->testSchemaSave();
         $this->cleanupConsoleTrait();
@@ -74,41 +78,58 @@ class SchemaCommandsTest extends TestCase
     }
 
     /**
+     * @depends testSchemaSave
+     */
+    public function testSchemaDrop(): void
+    {
+        $this->callDropCommand();
+
+        $this->expectException(
+            class_exists(DatabaseException::class)
+                ? DatabaseException::class
+                : Exception::class
+        );
+        $table = TableRegistry::getTableLocator()->get('Profiles');
+        $table->find()->toArray();
+    }
+
+    /**
      * @depends testSchemaDrop
      */
     public function testSchemaLoad(): void
     {
-        $this->testSchemaDrop();
+        $this->callDropCommand();
         $this->cleanupConsoleTrait();
         $this->useCommandRunner();
         $this->exec('schema load -c test', ['y']);
         $this->assertExitSuccess();
+
+        $table = TableRegistry::getTableLocator()->get('Profiles');
+        $this->assertIsArray($table->find()->toArray());
     }
 
     /**
      * @depends testSchemaSave
-     * @depends testSchemaDrop
      */
-    public function testLoadFixturesFromSchemaFile(): void
+    public function testFixturesWorking(): void
     {
-        // build schema.php
         $this->testSchemaSave();
-        $this->cleanupConsoleTrait();
-        $this->useCommandRunner();
+        $this->dropTables();
+        if ($this->fixtureManager === null) {
+            $this->markAsRisky();
 
-        // clean db
-        $this->testSchemaDrop();
-        $this->cleanupConsoleTrait();
-        $this->useCommandRunner();
-
-        // action
-        $this->cleanupConsoleTrait();
-        $this->useCommandRunner();
-        $this->exec('schema load -c test --path ' . TESTS . 'files/schema.php', ['y']);
-        $this->assertExitSuccess();
-
-        // Asserts
-        $profiles = TableRegistry::getTableLocator()->get('Profiles')->find('all')->toArray();
-        $this->assertIsArray($profiles);
+            return;
+        }
+        $this->fixtures = [
+            'app.Profiles',
+            'app.Users',
+        ];
+        $this->fixtureManager->fixturize($this);
+        $this->loadFixtures();
+        $profiles = TableRegistry::getTableLocator()->get('Profiles');
+        $query = $profiles->find();
+        $this->assertSame($query->count(), 1, 'Profile data not loaded from seed');
+        $profile = $query->first();
+        $this->assertSame($profile->get('name'), 'admin');
     }
 }

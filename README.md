@@ -3,13 +3,14 @@
 for usage in CakePHP 3.x see the [2.x branch](https://github.com/raul338/cakephp-schema/tree/2.x)
 
 Save the schema into one file and use as an automatic schema for Fixtures. The schema is automatically saved when executing `cake migrations migrate`.
+This also allows for local testing with test suite data for debugging.
 
 ## Supported datasources
 
 - Postgres
 - MySQL
-- SQL Server
-- ~~SQLite~~ not yet
+- SQLite
+- ~~SQL Server~~ not tested yet
 
 ## Installation
 
@@ -60,7 +61,8 @@ The `seed.php` file should return array of tables and rows:
                 'id' => 1,
                 'category_id' => 1,
                 'label' => 'CakePHP'
-            ], [
+            ],
+            [
                 'id' => 2,
                 'label' => 'Schema plugin',
                 'json_type_field' => [
@@ -138,6 +140,3 @@ class UsersFixture extends SchemaFixture
 - [x] Tests
 - [ ] More options and configuration
 - [ ] Refactoring and cleaning the code
-
-## Known issues
- - SQLite is not fully supported

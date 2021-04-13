@@ -7,6 +7,7 @@ use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Hash;
+use Migrations\Migrations;
 
 /**
  * Class SeedCommandsTest
@@ -17,26 +18,32 @@ use Cake\Utility\Hash;
 class SeedCommandsTest extends TestCase
 {
     use ConsoleIntegrationTestTrait;
+    use UtilitiesTrait;
+
+    public $autoFixtures = false;
 
     /**
      * @var string
      */
-    public $schemaFile = TESTS . 'files' . DS . 'schema.php';
+    public $schemaFile = CONFIG . DS . 'schema.php';
 
     /**
      * @var string
      */
     public $seedFile = TESTS . 'files' . DS . 'seed.php';
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
         $this->useCommandRunner();
 
+        $this->dropTables();
         if (file_exists(CONFIG . 'schema.php')) {
             unlink(CONFIG . 'schema.php');
         }
-        $this->exec('schema load -n -c test --path ' . $this->schemaFile);
+        $migration = new Migrations();
+        $migration->migrate(['connection' => 'test']);
+        $this->exec('schema save -c test');
         $this->cleanupConsoleTrait();
         $this->useCommandRunner();
     }
@@ -46,6 +53,9 @@ class SeedCommandsTest extends TestCase
         $profiles = TableRegistry::getTableLocator()->get('profiles');
         $profile = $profiles->newEntity(['name' => 'admin']);
         $profiles->saveOrFail($profile);
+        if (file_exists(CONFIG . 'seed.php')) {
+            unlink(CONFIG . 'seed.php');
+        }
 
         $this->exec('schema generateseed -c test --path ' . $this->schemaFile, ['y']);
         $this->assertOutputContains('seed');

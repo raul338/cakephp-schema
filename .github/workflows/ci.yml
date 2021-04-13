@@ -11,14 +11,100 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: [ '7.2', '7.4', '8.0' ]
+        db-type: [ sqlite, mysql, pgsql ]
+        prefer-lowest: [ '' ]
+        composer: ['v2']
+        include:
+          - php-version: '7.2'
+            db-type: 'mariadb'
+          - php-version: '7.2'
+            db-type: 'mysql'
+            prefer-lowest: 'prefer-lowest'
+            composer: 'v1'
     steps:
+      - name: Setup MySQL latest
+        if: matrix.db-type == 'mysql' && matrix.php-version != '7.2'
+        run: docker run --rm --name=mysqld -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cakephp -p 3306:3306 -d mysql --default-authentication-plugin=mysql_native_password --disable-log-bin
+
+      - name: Setup MySQL 5.6
+        if: matrix.db-type == 'mysql' && matrix.php-version == '7.2'
+        run: docker run --rm --name=mysqld -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=cakephp -p 3306:3306 -d mysql:5.6 --character-set-server=utf8
+
+      - name: Setup PostgreSQL latest
+        if: matrix.db-type == 'pgsql' && matrix.php-version != '7.2'
+        run: docker run --rm --name=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=cakephp -p 5432:5432 -d postgres
+
+      - name: Setup PostgreSQL 9.4
+        if: matrix.db-type == 'pgsql' && matrix.php-version == '7.2'
+        run: docker run --rm --name=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=cakephp -p 5432:5432 -d postgres:9.4
+
+      - uses: getong/mariadb-action@v1.1
+        if: matrix.db-type == 'mariadb'
+        with:
+          mysql database: 'cakephp'
+          mysql root password: 'root'
+
       - uses: actions/checkout@v2
 
       - uses: shivammathur/setup-php@v2
         with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl, pdo_${{ matrix.db-type }}
+          coverage: pcov
+          tools: composer:${{ matrix.composer }}
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Get date part for cache key
+        id: key-date
+        run: echo "::set-output name=date::$(date +'%Y-%m')"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}-${{ matrix.prefer-lowest }}
+
+      - name: Install dependencies
+        run: |
+          if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
+            composer update --prefer-lowest --prefer-stable --no-progress
+          else
+            composer install
+          fi
+
+      - name: Run test
+        run: |
+          if [[ ${{ matrix.db-type }} == 'sqlite' ]]; then export DB_URL='sqlite:///:memory:'; fi
+          if [[ ${{ matrix.db-type }} == 'mysql' && ${{ matrix.php-version }} != '7.2' ]]; then export DB_URL='mysql://root:root@127.0.0.1/cakephp'; fi
+          if [[ ${{ matrix.db-type }} == 'mysql' && ${{ matrix.php-version }} == '7.2' ]]; then export DB_URL='mysql://root:root@127.0.0.1/cakephp?encoding=utf8'; fi
+          if [[ ${{ matrix.db-type }} == 'mariadb' ]]; then export DB_URL='mysql://root:root@127.0.0.1/cakephp'; fi
+          if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then export DB_URL='postgres://postgres:postgres@127.0.0.1/postgres'; fi
+          if [[ ${{ matrix.php-version }} == '7.4' ]]; then
+            vendor/bin/phpunit --verbose --coverage-text
+          else
+            vendor/bin/phpunit --verbose
+          fi
+  cs-stan:
+    name: Coding Standard & Static Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
           php-version: '7.4'
           extensions: mbstring, intl
-          coverage: xdebug
+          coverage: none
+          tools: composer
 
       - name: Get Composer Cache Directory
         id: composer-cache
@@ -33,46 +119,9 @@ jobs:
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Run test
-        run: env XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text --verbose
-  cs-stan:
-    name: Coding Standard & Static Analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          extensions: mbstring, intl
-          coverage: none
-
-      - name: Get Composer Cache Directory
-        id: composer-cache
-        run: |
-          echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-          - name: Get date part for cache key
-            id: key-date
-            run: echo "::set-output name=date::$(date +'%Y-%m')"
-
-          - uses: actions/cache@v1
-            with:
-              path: ${{ steps.composer-cache.outputs.dir }}
-              key: ${{ runner.os }}-composer-${{ steps.key-date.outputs.date }}-${{ hashFiles('composer.json') }}
-              restore-keys: |
-                ${{ runner.os }}-composer-
-
-          - name: Install dependencies
-            run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress
 
       - name: Run phpcs
         run: vendor/bin/phpcs

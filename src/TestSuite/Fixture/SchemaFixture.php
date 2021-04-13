@@ -16,14 +16,14 @@ class SchemaFixture extends TestFixture
      *
      * @var string
      */
-    public $seedFile = ROOT . DS . 'config' . DS . 'seed.php';
+    public $seedFile = CONFIG . 'seed.php';
 
     /**
      * Schema File to load fixture schema
      *
      * @var string
      */
-    public $schemaFile = ROOT . DS . 'config' . DS . 'schema.php';
+    public $schemaFile = CONFIG . 'schema.php';
 
     /**
      * Workaround to use cakephp-schema seed as fixtures
@@ -36,6 +36,9 @@ class SchemaFixture extends TestFixture
         $className = substr($className, 0, strlen('Fixture') * -1);
         $className = Inflector::underscore($className);
 
+        if (!file_exists($this->schemaFile)) {
+            throw new \RuntimeException(sprintf('Schema file `%s` does not exist..', $this->schemaFile));
+        }
         $ret = require $this->schemaFile;
         if (!is_array($ret)) {
             throw new \RuntimeException(sprintf('Schema file `%s` did not return an array.', $this->schemaFile));

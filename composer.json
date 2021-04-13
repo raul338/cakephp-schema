@@ -26,12 +26,12 @@
     "require": {
         "php": ">=7.2",
         "cakephp/cakephp": "~4.0",
+        "cakephp/bake": "~2.0",
         "riimu/kit-phpencoder": "2.*",
         "cakephp/migrations": "^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "cakephp/bake": "~2.0",
+        "phpunit/phpunit": "^8.5 || ^9.5",
         "cakephp/cakephp-codesniffer": "^4.2",
         "dereuromark/cakephp-ide-helper": "^1.0",
         "phpstan/phpstan": "^0.12.8"
@@ -53,7 +53,5 @@
         "cs-check": "phpcs --colors -p",
         "cs-fix": "phpcbf --colors -p",
         "phpstan": "phpstan analyze -c phpstan.neon --ansi --memory-limit=-1"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
