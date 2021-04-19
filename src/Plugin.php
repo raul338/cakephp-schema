@@ -40,7 +40,7 @@ class Plugin extends BasePlugin
                 $connectionName = $input->getOption('connection');
 
                 $command = new SchemaSaveCommand();
-                $io = new ConsoleIo();
+                $io = $event->getData('io') ?: new ConsoleIo();
                 $args = new Arguments([], [
                     'interactive' => false,
                     'connection' => $connectionName ?: 'default',

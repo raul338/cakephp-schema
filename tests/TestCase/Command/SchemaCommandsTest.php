@@ -3,14 +3,21 @@ declare(strict_types=1);
 
 namespace Schema\Test\TestCase\Command;
 
+use Cake\Console\ConsoleIo;
 use Cake\Database\Exception;
 use Cake\Database\Exception\DatabaseException;
+use Cake\Event\Event;
+use Cake\Event\EventManager;
 use Cake\ORM\Entity;
 use Cake\ORM\TableRegistry;
 use Cake\TestSuite\ConsoleIntegrationTestTrait;
 use Cake\TestSuite\TestCase;
 use Cake\Utility\Hash;
-use Migrations\Migrations;
+use Migrations\CakeManager;
+use Migrations\Command\Phinx\Migrate;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputDefinition;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Class SchemaCommandsTest
@@ -125,5 +132,31 @@ class SchemaCommandsTest extends TestCase
         $this->assertNotNull($profile, 'profile should not be null');
         $this->assertInstanceOf(Entity::class, $profile);
         $this->assertSame($profile->get('name'), 'admin');
+    }
+
+    public function testSchemaSaveAfterMigrate(): void
+    {
+        $this->useCommandRunner();
+        $this->runMigrations();
+
+        // initialize app
+        $this->exec('schema save --help');
+
+        $command = new Migrate();
+        $manager = $this->getMockBuilder(CakeManager::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getInput'])
+            ->getMock();
+        $definition = new InputDefinition();
+        $definition->addOption(new InputOption('connection'));
+        $input = new ArrayInput(['--connection' => 'test'], $definition);
+        $manager->method('getInput')
+            ->willReturn($input);
+        $command->setManager($manager);
+        $event = new Event('Migration.afterMigrate', $command);
+        $event->setData('io', new ConsoleIo($this->_out, $this->_err, $this->_in));
+        EventManager::instance()->dispatch($event);
+
+        $this->assertValidSchemaFile();
     }
 }
