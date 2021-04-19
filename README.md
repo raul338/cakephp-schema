@@ -94,23 +94,23 @@ Seed commands will take the following options:
 
 
 
-## Other examples
+### Other examples
 
     cake schema save --connection test
     cake schema save --path config/schema/schema.lock
     cake schema load --connection test --path config/schema/schema.lock --no-interaction
 
-# To only drop all tables in database
+To only drop all tables in database
 
     cake schema drop
     cake schema drop --connection test
 
-# Seeding Examples
+Seeding Examples
 
     cake schema seed --truncate
     cake schema generateseed --seed config/my_seed.php
 
-# Fixture generation
+## Fixture generation
 
 This plugins allows to use generated schema and seeds as fixture model and data, by using a `SchemaFixture`. You can extend your fixtures just like the book indicates.
 
@@ -134,7 +134,7 @@ class UsersFixture extends SchemaFixture
 ```
 
 ## TODO
- 
+
 - [x] Auto-creation of the schema.php file after `cake migrations migrate`
 - [x] Data seeding
 - [x] Tests
