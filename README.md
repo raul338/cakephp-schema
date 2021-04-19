@@ -110,6 +110,11 @@ Seeding Examples
     cake schema seed --truncate
     cake schema generateseed --seed config/my_seed.php
 
+In case you are using [Tree Behavior](https://book.cakephp.org/4/en/orm/behaviors/tree.html) in your table, you can recover
+the tree from seed data: (it will recalculate `lft` & `rght` values)
+
+    cake recover_tree categories
+
 ## Fixture generation
 
 This plugins allows to use generated schema and seeds as fixture model and data, by using a `SchemaFixture`. You can extend your fixtures just like the book indicates.
