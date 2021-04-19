@@ -11,6 +11,7 @@ use Cake\Core\Configure;
 use Cake\Core\PluginApplicationInterface;
 use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
+use Schema\Command\RecoverTreeCommand;
 use Schema\Command\SchemaDropCommand;
 use Schema\Command\SchemaLoadCommand;
 use Schema\Command\SchemaSaveCommand;
@@ -59,6 +60,8 @@ class Plugin extends BasePlugin
         $commands->add('schema load', SchemaLoadCommand::class);
         $commands->add('schema generateseed', SeedGenerateCommand::class);
         $commands->add('schema seed', SeedCommand::class);
+
+        $commands->add('recover_tree', RecoverTreeCommand::class);
 
         return parent::console($commands);
     }

@@ -35,11 +35,7 @@ class SchemaCommandsTest extends TestCase
 
     public function testSchemaSave(): void
     {
-        if (file_exists(CONFIG . 'schema.php')) {
-            unlink(CONFIG . 'schema.php');
-        }
-        $migration = new Migrations();
-        $migration->migrate(['connection' => 'test']);
+        $this->runMigrations();
         $this->exec('schema save -c test');
         $this->assertExitSuccess();
         $this->assertValidSchemaFile();
@@ -47,12 +43,7 @@ class SchemaCommandsTest extends TestCase
 
     public function testSchemaSaveOverwriteFile(): void
     {
-        if (file_exists(CONFIG . 'schema.php')) {
-            unlink(CONFIG . 'schema.php');
-        }
-        touch(CONFIG . 'schema.php');
-        $migration = new Migrations();
-        $migration->migrate(['connection' => 'test']);
+        $this->runMigrations();
         $this->exec('schema save -c test', ['y']);
         $this->assertExitSuccess();
         $this->assertValidSchemaFile();
