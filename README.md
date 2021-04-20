@@ -1,5 +1,7 @@
 # Schema plugin for CakePHP 4.x
 
+[![codecov](https://codecov.io/gh/raul338/cakephp-schema/branch/master/graph/badge.svg?token=FOLZCY7VSI)](https://codecov.io/gh/raul338/cakephp-schema)
+
 for usage in CakePHP 3.x see the [2.x branch](https://github.com/raul338/cakephp-schema/tree/2.x)
 
 Save the schema into one file and use as an automatic schema for Fixtures. The schema is automatically saved when executing `cake migrations migrate`.
