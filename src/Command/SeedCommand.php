@@ -47,7 +47,7 @@ class SeedCommand extends Command
     {
         $this->_config = [
             'connection' => $args->getOption('connection'),
-            'seed' => $args->getOption('seed'),
+            'seed' => $args->getOption('seed') ?: CONFIG . 'seed.php',
             'truncate' => filter_var($args->getOption('truncate'), FILTER_VALIDATE_BOOLEAN),
             'no-interaction' => filter_var($args->getOption('no-interaction'), FILTER_VALIDATE_BOOLEAN),
         ];
@@ -303,9 +303,8 @@ class SeedCommand extends Command
                 'short' => 'c',
             ])
             ->addOption('seed', [
-                'help' => 'Path to the seed.php file.',
+                'help' => 'Path to the seed.php file. Defaults to CONFIG . "seed.php"',
                 'short' => 's',
-                'default' => 'config/seed.php',
             ])
             ->addOption('truncate', [
                 'help' => 'Truncate tables before seeding.',
