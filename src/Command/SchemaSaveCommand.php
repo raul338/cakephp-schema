@@ -85,6 +85,11 @@ class SchemaSaveCommand extends SimpleBakeCommand
         ];
         $this->tables = $this->_describeTables($args, $io);
 
+        $filePath = $this->getPath($args) . $this->fileName('schema');
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
         parent::bake('schema', $args, $io);
 
         return self::CODE_SUCCESS;

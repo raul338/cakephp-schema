@@ -51,7 +51,8 @@ class SchemaCommandsTest extends TestCase
     public function testSchemaSaveOverwriteFile(): void
     {
         $this->runMigrations();
-        $this->exec('schema save -c test', ['y']);
+        $this->assertTrue(touch(CONFIG . 'schema.php'), 'Could not create dummy file');
+        $this->exec('schema save -c test');
         $this->assertExitSuccess();
         $this->assertValidSchemaFile();
     }
