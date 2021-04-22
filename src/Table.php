@@ -19,13 +19,6 @@ class Table extends TableSchema
     protected $_foreignKeys = [];
 
     /**
-     * Foreign keys constraints represented as SQL statements
-     *
-     * @var array<string>
-     */
-    protected $_foreignKeysSql = [];
-
-    /**
      * Generate the SQL to create the Table without foreign keys.
      *
      * Uses the connection to access the schema dialect
@@ -37,7 +30,7 @@ class Table extends TableSchema
      */
     public function createSql(Connection $connection): array
     {
-        $this->_extractForeignKeys($connection);
+        $this->_extractForeignKeys();
 
         return parent::createSql($connection);
     }
@@ -45,39 +38,26 @@ class Table extends TableSchema
     /**
      * Returns list of ALTER TABLE statements to add foreign key constraints.
      *
-     * @param \Cake\Database\Connection $connection The connection to generate SQL for.
-     * @return array<string> List of SQL statements to create the foreign keys.
+     * @return void
      */
-    public function foreignKeysSql(Connection $connection)
+    public function restoreForeignKeys()
     {
-        $constraints = [];
-        foreach ($this->_foreignKeysSql as $statement) {
-            // TODO: Move this to the driver. SQLite is not supported.
-            $constraints[] = sprintf(
-                'ALTER TABLE %s ADD %s',
-                $connection->quoteIdentifier($this->name()),
-                $statement
-            );
+        foreach ($this->_foreignKeys as $name => $attrs) {
+            $this->_constraints[$name] = $attrs;
         }
-
-        return $constraints;
     }
 
     /**
      * Refresh the protected foreign keys variable.
      * All foreign keys are removed from the original constraints.
      *
-     * @param \Cake\Database\Connection $connection Connection
      * @return void
      */
-    protected function _extractForeignKeys(Connection $connection)
+    protected function _extractForeignKeys()
     {
-        $dialect = $connection->getDriver()->schemaDialect();
-
         foreach ($this->_constraints as $name => $attrs) {
             if ($attrs['type'] === static::CONSTRAINT_FOREIGN) {
                 $this->_foreignKeys[$name] = $attrs;
-                $this->_foreignKeysSql[$name] = $dialect->constraintSql($this, $name);
                 unset($this->_constraints[$name]);
             }
         }

@@ -81,6 +81,7 @@ class SchemaLoadCommand extends Command
 
         // Add all foreign key constraints
         foreach ($tableSchemes as $table) {
+            $table->restoreForeignKeys();
             $foreignKeys = $table->addConstraintSql($db);
             $queries = array_merge($queries, $foreignKeys);
         }
